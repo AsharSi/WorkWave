@@ -36,7 +36,7 @@ router.post("/register", async (req, res, next) => {
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)
             .json(rest)
-            
+
     } catch (error) {
         next(error);
     }
@@ -44,8 +44,8 @@ router.post("/register", async (req, res, next) => {
 
 //LOGIN
 router.post("/login", async (req, res, next) => {
-    const { email, password } = req.body;
     try {
+        const { email, password } = req.body;
         const validCompany = await Company.findOne({ email });
         if (!validCompany) return next(errorHandler(404, "Company not found!"));
         const validPassword = await bcryptjs.compareSync(password, validCompany.password);

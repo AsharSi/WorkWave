@@ -4,7 +4,7 @@ import CompetitionStage from '../models/CompetitionStage.js';
 const router = express.Router();
 
 // Create a new stage for a competition
-router.post('/competitions/:competitionId/stages', async (req, res) => {
+router.post('/:competitionId/stages', async (req, res) => {
   const { name, description, stageNumber, maxScore, isFinalStage } = req.body;
   try {
     const newStage = new CompetitionStage({
@@ -23,7 +23,7 @@ router.post('/competitions/:competitionId/stages', async (req, res) => {
 });
 
 // Get all stages for a competition
-router.get('/competitions/:competitionId/stages', async (req, res) => {
+router.get('/:competitionId/stages', async (req, res) => {
   try {
     const stages = await CompetitionStage.find({ competitionId: req.params.competitionId });
     res.status(200).json(stages);
@@ -33,7 +33,7 @@ router.get('/competitions/:competitionId/stages', async (req, res) => {
 });
 
 // Get a stage by ID
-router.get('/competitions/:competitionId/stages/:id', async (req, res) => {
+router.get('/:competitionId/stages/:id', async (req, res) => {
   try {
     const stage = await CompetitionStage.findById(req.params.id);
     if (!stage) return res.status(404).json({ message: 'Stage not found' });
@@ -44,7 +44,7 @@ router.get('/competitions/:competitionId/stages/:id', async (req, res) => {
 });
 
 // Update a stage
-router.put('/competitions/:competitionId/stages/:id', async (req, res) => {
+router.put('/:competitionId/stages/:id', async (req, res) => {
   const { name, description, stageNumber, maxScore, isFinalStage } = req.body;
   try {
     const updatedStage = await CompetitionStage.findByIdAndUpdate(req.params.id, {
@@ -61,7 +61,7 @@ router.put('/competitions/:competitionId/stages/:id', async (req, res) => {
 });
 
 // Delete a stage
-router.delete('/competitions/:competitionId/stages/:id', async (req, res) => {
+router.delete('/:competitionId/stages/:id', async (req, res) => {
   try {
     await CompetitionStage.findByIdAndDelete(req.params.id);
     res.status(200).json('Stage has been deleted...');
