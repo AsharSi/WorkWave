@@ -1,0 +1,196 @@
+import express from "express";
+import jwt from "jsonwebtoken";
+import bcryptjs from 'bcryptjs';
+import User from "../models/User.js";
+import { errorHandler } from "../utils/error.js";
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
+const router = express.Router();
+
+//REGISTER
+router.post("/register", async (req, res, next) => {
+    const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
+    
+    const newUser = new User({
+        username: req.body.username,
+        email: req.body.email,
+        phoneNumber: req.body.phoneNumber,
+        phoneCode: req.body.phoneCode,
+        address: req.body.address,
+        pincode: req.body.pincode,
+        city: req.body.city,
+        state: req.body.state,
+        country: req.body.country,
+        password: hashedPassword
+    });
+    
+    try {
+        const savedUser = await newUser.save();
+
+        const token = jwt.sign({ id: savedUser._id, isAdmin: savedUser.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = savedUser._doc;
+        res
+            .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
+            .status(200)
+            .json(rest)
+    } catch (error) {
+        next(error);
+    }
+})
+
+//LOGIN
+router.post("/login", async (req, res, next) => {
+    const { email, password } = req.body;
+    try {
+        const validUser = await User.findOne({ email });
+        if (!validUser) return next(errorHandler(404, "User not found!"));
+        const validPassword = await bcryptjs.compareSync(password, validUser.password);
+        if (!validPassword) return next(errorHandler(401, "Wrong Credentials!"));
+        const token = jwt.sign({ id: validUser._id, isAdmin: validUser.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = validUser._doc;
+        res
+            .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
+            .status(200)
+            .json(rest)
+    } catch (error) {
+        next(error)
+    }
+})
+
+// O-AUTH
+router.post("/google", async (req, res, next) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (user) {
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+            const { password: pass, ...rest } = user._doc;
+            res
+                .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
+                .status(200)
+                .json(rest);
+        } else {
+            const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+            const newUser = new User({
+                username: req.body.username,
+                email: req.body.email,
+                password: hashedPassword,
+                phoneNumber: req.body.phoneNumber,
+                phoneCode: req.body.phoneCode,
+                address: req.body.address,
+                pincode: req.body.pincode,
+                city: req.body.city,
+                state: req.body.state,
+                country: req.body.country
+            });
+            await newUser.save();
+            const token = jwt.sign(
+                {
+                    id: user._id,
+                    isAdmin: user.isAdmin,
+                },
+                process.env.JWT_SECRET
+            );
+            const { password: pass, ...rest } = newUser._doc;
+            res
+                .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
+                .status(200)
+                .json(rest);
+        }
+
+    } catch (error) {
+        next(error)
+    }
+})
+
+// LOGOUT
+router.post("/logout", async (req, res, next) => {
+    try {
+        res.clearCookie('access_token');
+        res.status(200).json("User has been logged out!");
+    } catch (error) {
+        next(error)
+    }
+})
+
+// Forgot Password
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 300000; // Token expires in 5 minutes
+        await user.save();
+
+        // Send email with reset link
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: 'josaacounsellors@gmail.com',
+                pass: process.env.MAIL
+            }
+        })
+        const mailOptions = {
+            from: 'josaacounsellors@gmail.com',
+            to: user.email,
+            subject: 'Password Reset Request',
+            text: `Click on this link to reset your password: http://localhost:5173/reset/${resetToken}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                res.status(500).json({ message: "Can't send reset link!" });
+            } else {
+                console.log('Email sent');
+            }
+        });
+
+        res.json({ message: 'Password reset email sent' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// Reset Password
+router.post('/reset-password/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        // Find user by reset token
+        const user = await User.findOne({ resetPasswordToken: token });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Check if token is expired
+        if (user.resetPasswordExpires < Date.now()) {
+            return res.status(400).json({ message: 'Token has expired' });
+        }
+
+        // Hash password and save to user
+        const hashedPassword = bcryptjs.hashSync(password, 10);
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Password reset successful' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+export default router;
