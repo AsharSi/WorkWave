@@ -4,7 +4,7 @@ import Competition from '../models/Competition.js';
 const router = express.Router();
 
 // Create a new competition
-router.post('/competitions', async (req, res) => {
+router.post('/', async (req, res) => {
     const { companyId, name, description, startDate, endDate, registrationDeadline, maxParticipants } = req.body;
     try {
         const newCompetition = new Competition({
@@ -24,7 +24,7 @@ router.post('/competitions', async (req, res) => {
 });
 
 // Get all competitions
-router.get('/competitions', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const competitions = await Competition.find().populate('companyId');
         res.status(200).json(competitions);
@@ -34,7 +34,7 @@ router.get('/competitions', async (req, res) => {
 });
 
 // Get a competition by ID
-router.get('/competitions/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const competition = await Competition.findById(req.params.id).populate('companyId');
         if (!competition) return res.status(404).json({ message: 'Competition not found' });
@@ -45,7 +45,7 @@ router.get('/competitions/:id', async (req, res) => {
 });
 
 // Update a competition
-router.put('/competitions/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     const { companyId, name, description, startDate, endDate, registrationDeadline, maxParticipants } = req.body;
     try {
         const updatedCompetition = await Competition.findByIdAndUpdate(req.params.id, {
@@ -64,7 +64,7 @@ router.put('/competitions/:id', async (req, res) => {
 });
 
 // Delete a competition
-router.delete('/competitions/:id', async (req, res) => {
+router.delete('//:id', async (req, res) => {
     try {
         await Competition.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: 'Competition deleted successfully' });

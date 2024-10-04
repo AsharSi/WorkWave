@@ -1,6 +1,7 @@
 import express from "express";
 import Company from "../models/Company.js";
 import bcryptjs from 'bcryptjs';
+
 import { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } from "../utils/verifyToken.js";
 
 const router = express.Router();
