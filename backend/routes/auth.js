@@ -1,7 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcryptjs from 'bcryptjs';
-import User from "../models/User.js";
+import Company from "../models/Company.js";
 import { errorHandler } from "../utils/error.js";
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -10,30 +10,33 @@ const router = express.Router();
 
 //REGISTER
 router.post("/register", async (req, res, next) => {
-    const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
-    
-    const newUser = new User({
-        username: req.body.username,
-        email: req.body.email,
-        phoneNumber: req.body.phoneNumber,
-        phoneCode: req.body.phoneCode,
-        address: req.body.address,
-        pincode: req.body.pincode,
-        city: req.body.city,
-        state: req.body.state,
-        country: req.body.country,
-        password: hashedPassword
-    });
-    
     try {
-        const savedUser = await newUser.save();
+        const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
 
-        const token = jwt.sign({ id: savedUser._id, isAdmin: savedUser.isAdmin }, process.env.JWT_SECRET);
-        const { password: pass, ...rest } = savedUser._doc;
+        const email = req.body.email;
+        const existingCompany = await Company.findOne ({ email });
+
+        if (existingCompany) return next(errorHandler(400, "Company already exists!"));
+
+        const newCompany = new Company({
+            company_name: req.body.company_name,
+            email: req.body.email,
+            description: req.body.description,
+            phoneNumber: req.body.phoneNumber,
+            phoneCode: req.body.phoneCode,
+            country: req.body.country,
+            password: hashedPassword
+        });
+
+        const savedCompany = await newCompany.save();
+
+        const token = jwt.sign({ id: savedCompany._id, isAdmin: savedCompany.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = savedCompany._doc;
         res
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)
             .json(rest)
+            
     } catch (error) {
         next(error);
     }
@@ -43,12 +46,12 @@ router.post("/register", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
     try {
-        const validUser = await User.findOne({ email });
-        if (!validUser) return next(errorHandler(404, "User not found!"));
-        const validPassword = await bcryptjs.compareSync(password, validUser.password);
+        const validCompany = await Company.findOne({ email });
+        if (!validCompany) return next(errorHandler(404, "Company not found!"));
+        const validPassword = await bcryptjs.compareSync(password, validCompany.password);
         if (!validPassword) return next(errorHandler(401, "Wrong Credentials!"));
-        const token = jwt.sign({ id: validUser._id, isAdmin: validUser.isAdmin }, process.env.JWT_SECRET);
-        const { password: pass, ...rest } = validUser._doc;
+        const token = jwt.sign({ id: validCompany._id, isAdmin: validCompany.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = validCompany._doc;
         res
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)
@@ -61,10 +64,10 @@ router.post("/login", async (req, res, next) => {
 // O-AUTH
 router.post("/google", async (req, res, next) => {
     try {
-        const user = await User.findOne({ email: req.body.email });
-        if (user) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-            const { password: pass, ...rest } = user._doc;
+        const Company = await Company.findOne({ email: req.body.email });
+        if (Company) {
+            const token = jwt.sign({ id: Company._id }, process.env.JWT_SECRET);
+            const { password: pass, ...rest } = Company._doc;
             res
                 .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
                 .status(200)
@@ -72,27 +75,23 @@ router.post("/google", async (req, res, next) => {
         } else {
             const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
             const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
-            const newUser = new User({
-                username: req.body.username,
+            const newCompany = new Company({
+                company_name: req.body.company_name,
                 email: req.body.email,
                 password: hashedPassword,
                 phoneNumber: req.body.phoneNumber,
                 phoneCode: req.body.phoneCode,
-                address: req.body.address,
-                pincode: req.body.pincode,
-                city: req.body.city,
-                state: req.body.state,
                 country: req.body.country
             });
-            await newUser.save();
+            await newCompany.save();
             const token = jwt.sign(
                 {
-                    id: user._id,
-                    isAdmin: user.isAdmin,
+                    id: Company._id,
+                    isAdmin: Company.isAdmin,
                 },
                 process.env.JWT_SECRET
             );
-            const { password: pass, ...rest } = newUser._doc;
+            const { password: pass, ...rest } = newCompany._doc;
             res
                 .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
                 .status(200)
@@ -108,7 +107,7 @@ router.post("/google", async (req, res, next) => {
 router.post("/logout", async (req, res, next) => {
     try {
         res.clearCookie('access_token');
-        res.status(200).json("User has been logged out!");
+        res.status(200).json("Company has been logged out!");
     } catch (error) {
         next(error)
     }
@@ -118,17 +117,17 @@ router.post("/logout", async (req, res, next) => {
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const Company = await Company.findOne({ email });
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!Company) {
+            return res.status(404).json({ message: 'Company not found' });
         }
 
         // Generate reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 300000; // Token expires in 5 minutes
-        await user.save();
+        Company.resetPasswordToken = resetToken;
+        Company.resetPasswordExpires = Date.now() + 300000; // Token expires in 5 minutes
+        await Company.save();
 
         // Send email with reset link
         const transporter = nodemailer.createTransport({
@@ -142,7 +141,7 @@ router.post('/forgot-password', async (req, res) => {
         })
         const mailOptions = {
             from: 'josaacounsellors@gmail.com',
-            to: user.email,
+            to: Company.email,
             subject: 'Password Reset Request',
             text: `Click on this link to reset your password: http://localhost:5173/reset/${resetToken}`
         };
@@ -168,24 +167,24 @@ router.post('/reset-password/:token', async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
 
-        // Find user by reset token
-        const user = await User.findOne({ resetPasswordToken: token });
+        // Find Company by reset token
+        const Company = await Company.findOne({ resetPasswordToken: token });
 
-        if (!user) {
+        if (!Company) {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
         // Check if token is expired
-        if (user.resetPasswordExpires < Date.now()) {
+        if (Company.resetPasswordExpires < Date.now()) {
             return res.status(400).json({ message: 'Token has expired' });
         }
 
-        // Hash password and save to user
+        // Hash password and save to Company
         const hashedPassword = bcryptjs.hashSync(password, 10);
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
+        Company.password = hashedPassword;
+        Company.resetPasswordToken = undefined;
+        Company.resetPasswordExpires = undefined;
+        await Company.save();
 
         res.json({ message: 'Password reset successful' });
     } catch (error) {
