@@ -1,87 +1,316 @@
-"use client"
-import React, { useState } from 'react';
+"use client";
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Input from "../Input";
+import { useUserStore } from "@/utils/userStore";
 
 const RegisterPage: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [otp, setOtp] = useState('');
-    const [isOtpSent, setIsOtpSent] = useState(false);
-    const [isVerified, setIsVerified] = useState(false);
+  const router = useRouter();
 
-    const handleSendOtp = async () => {
-        // Send OTP to the email address
-        console.log('Sending OTP to:', email);
-        setIsOtpSent(true);
-    };
+  const { setUserData } = useUserStore();
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [isOTPVerifing, setIsOTPVerifing] = useState(false);
 
-    const handleVerifyOtp = async () => {
-        // Verify the OTP
-        console.log('Verifying OTP:', otp);
-        setIsVerified(true);
-    };
+  const [user, setUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "user",
+  });
 
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        if (isVerified) {
-            // Handle registration logic here
-            console.log('Email:', email);
-            console.log('Password:', password);
-        } else {
-            console.log('Please verify your email first.');
-        }
-    };
+  const validatePhone = (phone: string) => {
+    return /^\d{10}$/.test(phone);
+  };
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-            <h2 className="text-2xl font-bold mb-6">Register</h2>
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-                <div className="mb-4">
-                    <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button type="button" onClick={handleSendOtp} className="mt-2 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">
-                        Send OTP
-                    </button>
-                </div>
-                {isOtpSent && (
-                    <div className="mb-4">
-                        <label htmlFor="otp" className="block text-gray-700 font-medium mb-2">OTP:</label>
-                        <input
-                            type="text"
-                            id="otp"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <button type="button" onClick={handleVerifyOtp} className="mt-2 w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-300">
-                            Verify OTP
-                        </button>
-                    </div>
-                )}
-                <div className="mb-4">
-                    <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-                <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">
-                    Register
-                </button>
-            </form>
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setUser((prevUser) => ({
+      ...prevUser,
+      [name]: value.trim(),
+    }));
+  };
+
+  const sendOTP = async () => {
+    if (
+      !user.firstName ||
+      !user.lastName ||
+      !user.email ||
+      !user.phone ||
+      !user.password
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    if (!validateEmail(user.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (!validatePhone(user.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    setIsOTPVerifing(true);
+
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      if (res.ok) {
+        setOtpSent(true);
+        toast.success("OTP sent!");
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      toast.error("An error occurred while sending OTP");
+      console.error("Error sending OTP:", error);
+    }
+    setIsOTPVerifing(false);
+  };
+
+  const verifyOTP = async () => {
+    if (!otp) {
+      toast.error("Please enter OTP.");
+      return;
+    }
+
+    setIsOTPVerifing(true);
+
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, otp }),
+      });
+
+      if (res.ok) {
+        toast.success("OTP verified!");
+        setOtpVerified(true);
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.error || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("An error occurred while verifying OTP");
+    }
+    setIsOTPVerifing(false);
+  };
+
+  const handleSubmitSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !user.firstName ||
+      !user.lastName ||
+      !user.email ||
+      !user.phone ||
+      !user.password
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    if (!validateEmail(user.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (!validatePhone(user.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    if (!otpVerified) {
+      toast.error("Please verify OTP first.");
+      return;
+    }
+    if (!agreeToTerms) {
+      toast.error("Please agree to the terms and conditions.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          first_name: user.firstName,
+          last_name: user.lastName,
+          name: `${user.firstName} ${user.lastName}`,
+          phone: user.phone,
+          password: user.password,
+          role: "user",
+        }),
+      });
+
+      if (res.ok) {
+        const userData = await res.json();
+        toast.success("Registration successful!");
+        setUserData(userData.user, userData.token);
+        router.push("/");
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.error || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Register error:", error);
+      toast.error("An error occurred during registration");
+    }
+  };
+
+  return (
+    <>
+      <div className="text-popover-foreground  flex flex-col mt-5">
+        <div className="text-[#666] font-medium text-sm mb-1">Hey Champ!</div>
+        <div className="font-semibold text-[#444] text-2xl mb-4 ">
+          Create your wiZe Account
+          <div className="h-[2px] my-2 bg-gradient-to-r from-white to-gray-400 max-w-[300px] rounded-full mt-3 "></div>
         </div>
-    );
+      </div>
+
+      <form onSubmit={handleSubmitSignUp} className="flex flex-col gap-y-2">
+        <div className="flex flex-col md:flex-row gap-2 ">
+          <Input
+            name="firstName"
+            placeholder="First Name"
+            type="text"
+            value={user.firstName}
+            onChange={handleChange}
+          />
+          <Input
+            name="lastName"
+            placeholder="Last Name"
+            type="text"
+            value={user.lastName}
+            onChange={handleChange}
+          />
+        </div>
+
+        <Input
+          name="email"
+          placeholder="Email"
+          type="email"
+          value={user.email}
+          onChange={handleChange}
+        />
+
+        <div className="flex flex-col md:flex-row md:space-x-2 ">
+          <div className="flex items-center justify-evenly w-full max-w-[150px] border-2 rounded-md mb-4 md:mb-0">
+            {/* <CountryCode /> */}
+          </div>
+
+          <Input
+            name="phone"
+            placeholder="Phone Number"
+            type="phone"
+            value={user.phone}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="flex flex-col md:flex-row md:space-x-2 items-center">
+          <Input
+            name="password"
+            placeholder="Password"
+            type="password"
+            value={user.password}
+            onChange={handleChange}
+          />
+          <div className="relative w-full md:mt-0">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full px-4 py-3 border-1 bg-white outline-none rounded-md text-[#222] placeholder:text-gray-400 placeholder:font-semibold  focus:border-primary-foreground font-medium hover:border-primary-foreground transition-all duration-300"
+            />
+            <button
+              type="button"
+              onClick={otpSent ? verifyOTP : sendOTP}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-white py-1 px-3 rounded-md text-sm font-medium transition-all duration-200"
+            >
+              {otpSent
+                ? isOTPVerifing
+                  ? "Verifing"
+                  : "Verify OTP"
+                : isOTPVerifing
+                ? "Sending"
+                : "Send OTP"}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 mt-3">
+          <input
+            type="checkbox"
+            checked={agreeToTerms}
+            onChange={(e) => setAgreeToTerms(e.target.checked)}
+            className="form-checkbox h-8 w-8 accent-primary transition duration-150 ease-in-out "
+          />
+          <span className="text-gray-800 text-xs font-medium">
+            All your information is collected, stored, and processed as per our
+            data processing guidelines. By signing up on wiZe, you agree to our{" "}
+            <Link
+              href="/privacypolicy"
+              className="text-purple-500 hover:text-purple-700 transition-colors duration-300"
+            >
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/termsandconditions"
+              className="text-purple-500 hover:text-purple-700 transition-colors duration-300"
+            >
+              Terms of Use
+            </Link>
+            .
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center mt-16 ">
+          <div className="text-gray-500 font-semibold">
+            <span className="text-sm">Already have an account? </span>{" "}
+            <Link href={"/login"} className="text-primary font-semibold">
+              Sign In
+            </Link>
+          </div>
+          <div className="flex space-x-6 mb-1">
+            <button
+              type="submit"
+              className="bg-primary text-white px-6 py-3 rounded-full font-bold flex items-center space-x-2 hover:scale-105 duration-200 md:text-xl h-1/2  "
+            >
+              <span>Sign Up</span>
+              <Image
+                src={"/images/Arrow.png"}
+                alt="Sign Up Icon"
+                className="w-6 h-6"
+                width={100}
+                height={100}
+              />
+            </button>
+          </div>
+        </div>
+      </form>
+    </>
+  );
 };
 
 export default RegisterPage;

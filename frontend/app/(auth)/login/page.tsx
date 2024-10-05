@@ -1,59 +1,250 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Input from "../Input";
+// import CountryCode from "../misc/CountryFlag";
+import { useUserStore } from "@/utils/userStore";
 
-const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const AuthForm: React.FC = () => {
+  const router = useRouter();
+  const { userData, setUserData, clearUser } = useUserStore();
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Handle login logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [isOtpLogin, setIsOtpLogin] = useState(false);
+
+  const handleCredentialsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCredentials((prevCredentials) => ({
+      ...prevCredentials,
+      [name]: value,
+    }));
+  };
+
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleSubmitLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.log("LoginviaPassword");
+    e.preventDefault();
+
+    if (!credentials.email || !credentials.password) {
+      toast.error("Please enter both email and password.");
+      return;
+    }
+
+    if (!validateEmail(credentials.email)) {
+      toast.error("Please enter a valid Gmail address.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        toast.success("Login successful!");
+
+        setUserData(data.user, data.token);
+
+        router.push("/");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    if (userData) {
+      router.push("/");
+    } else {
+      clearUser();
+    }
+  }, [userData]);
+
+  const sendOTPforlogin = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: credentials.email }),
+      });
+
+      if (response.ok) {
+        setOtpSent(true);
+        toast.success("OTP sent successfully!");
+      } else {
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP");
+      console.error("Error sending OTP:", error);
+    }
+  }, [credentials.email]);
+
+  const verifyOTPforlogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/auth/loginWithOtp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          otp: otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Handle successful OTP verification (e.g., log the user in, redirect, etc.)
+        console.log("OTP verified successfully:", data);
+        console.log(data.user);
+        toast.success("Login successful!");
+
+        setUserData(data.user, data.token);
+        router.push("/");
+      } else {
+        // Handle error (e.g., show an error message to the user)
+        console.error("Error verifying OTP:", data.error);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      const response = await fetch("/api/forgot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: credentials.email }),
+      });
+
+      if (response.ok) {
+        toast.success("Email sent successfully!");
+      } else {
+        toast.error("Failed to send email");
+      }
+    } catch (error) {
+      toast.error("Failed to send password reset request");
+      console.error("Error sending password reset request:", error);
+    }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <>
+     
+
       <form
-        onSubmit={handleSubmit}
-        className="flex flex-col w-80 p-6 bg-white shadow-md rounded"
+        onSubmit={isOtpLogin ? verifyOTPforlogin : handleSubmitLogin}
+        className="flex flex-col justify-between gap-4 lg:h-[60%] xl:h-1/2"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-black">Login</h2>
-        <label className="mb-4">
-          <span className="block text-gray-700">Email:</span>
-          <input
+        <div className="flex flex-col gap-1">
+          <Input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border rounded"
+            name="email"
+            placeholder="Email"
+            value={credentials.email}
+            onChange={handleCredentialsChange}
           />
-        </label>
-        <label className="mb-6">
-          <span className="block text-gray-700">Password:</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 p-2 w-full border rounded"
-          />
-        </label>
-        <button
-          type="submit"
-          className="py-2 px-4 bg-yellow-500 text-white rounded hover:bg-yellow-600 mb-4"
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Login with Google
-        </button>
+
+          <div
+            onClick={() => setIsOtpLogin(!isOtpLogin)}
+            className="text-primary text-left font-semibold px-4"
+          >
+            {isOtpLogin ? "Login with Password" : "Login via OTP"}
+          </div>
+        </div>
+
+        {isOtpLogin ? (
+          <div className="relative w-full flex flex-col gap-1">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              autoComplete="off"
+              className="w-full px-2 py-3 border-1 bg-white outline-none rounded-md text-black placeholder:text-gray-400 placeholder:font-semibold placeholder:text-l focus:border-primary-foreground focus:font-semibold  hover:border-primary-foreground transition-all duration-300"
+            />
+            <button className="font-semibold text-left text-primary px-4 absolute bottom-0 translate-y-full ">
+              Didn&apos;t Receive OTP yet?
+            </button>
+            <button
+              type="button"
+              onClick={sendOTPforlogin}
+              className="absolute font-semibold right-2 top-[30%] transform -translate-y-1/2 bg-purple-500 text-white p-2 rounded-sm text-xs transition-all duration-300 hover:shadow-lg hover:bg-purple-600"
+            >
+              {otpSent ? "Resend OTP" : "Send OTP"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <Input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={credentials.password}
+              onChange={handleCredentialsChange}
+            />
+            <div
+              onClick={handleForgotPassword}
+              className="font-semibold text-primary text-left px-4 "
+            >
+              Forgot Password
+            </div>
+          </div>
+        )}
+        <div className="flex justify-between items-center mt-12 mb-4">
+          <div className="text-gray-500 font-semibold">
+            <span className="text-sm">Don&apos;t have an account? &nbsp;</span>{" "}
+            <Link href="/register" className="text-primary font-semibold">
+              Register
+            </Link>
+          </div>
+          <button
+            type="submit"
+            className="bg-primary text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 duration-200 md:text-xl "
+          >
+            <span>Sign In</span>
+            <Image
+              src={"/images/Arrow.png"}
+              alt="Sign Up Icon"
+              className="w-8 h-8"
+              width={100}
+              height={100}
+            />
+          </button>
+        </div>
       </form>
-    </div>
+    </>
   );
 };
 
-export default LoginPage;
+export default AuthForm;
