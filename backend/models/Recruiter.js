@@ -7,6 +7,9 @@ const RecruiterSchema = new mongoose.Schema(
       required: true,
     },
     description: String,
+    competitions: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Competition" },
+    ],
     competitionStages: [
       { type: mongoose.Schema.Types.ObjectId, ref: "CompetitionStage" },
     ],

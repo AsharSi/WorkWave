@@ -14,7 +14,7 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         const updatedRecruiter = await Recruiter.findByIdAndUpdate(req.params.id, {
             $set: {
-                reqruiter: req.body.reqruiter,
+                recruiter: req.body.recruiter,
                 email: req.body.email,
                 password: req.body.password,
                 phoneNumber: req.body.phoneNumber,
@@ -69,11 +69,11 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
 // GET Recruiter
 router.get("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
-        const reqruiter = await Recruiter.findById(req.params.id)
+        const recruiter = await Recruiter.findById(req.params.id)
 
-        if (!reqruiter) return res.status(404).json("Recruiter does not exists!")
+        if (!recruiter) return res.status(404).json("Recruiter does not exists!")
 
-        const { password, ...others } = reqruiter._doc;
+        const { password, ...others } = recruiter._doc;
         res.status(200).json(others);
     } catch (error) {
         console.log(error)

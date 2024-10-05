@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const StudentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  cvLink: { type: String, required: true }, // link to the student's CV
+  cvLink: { type: String }, // link to the student's CV
   scores: [
     {
       competitionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Competition' },

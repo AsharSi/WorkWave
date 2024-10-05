@@ -4,7 +4,7 @@ import CompetitionStage from '../models/CompetitionStage.js';
 const router = express.Router();
 
 // Create a new stage for a competition
-router.post('/:competitionId/stages', async (req, res) => {
+router.post('/:competitionId', async (req, res) => {
   const { name, description, stageNumber, maxScore, isFinalStage } = req.body;
   try {
     const newStage = new CompetitionStage({
@@ -23,7 +23,7 @@ router.post('/:competitionId/stages', async (req, res) => {
 });
 
 // Get all stages for a competition
-router.get('/:competitionId/stages', async (req, res) => {
+router.get('/:competitionId', async (req, res) => {
   try {
     const stages = await CompetitionStage.find({ competitionId: req.params.competitionId });
     res.status(200).json(stages);
@@ -33,9 +33,9 @@ router.get('/:competitionId/stages', async (req, res) => {
 });
 
 // Get a stage by ID
-router.get('/:competitionId/stages/:id', async (req, res) => {
+router.get('/:competitionId/:stageId', async (req, res) => {
   try {
-    const stage = await CompetitionStage.findById(req.params.id);
+    const stage = await CompetitionStage.findById(req.params.stageId);
     if (!stage) return res.status(404).json({ message: 'Stage not found' });
     res.status(200).json(stage);
   } catch (error) {
@@ -44,10 +44,10 @@ router.get('/:competitionId/stages/:id', async (req, res) => {
 });
 
 // Update a stage
-router.put('/:competitionId/stages/:id', async (req, res) => {
+router.put('/:competitionId/:stageId', async (req, res) => {
   const { name, description, stageNumber, maxScore, isFinalStage } = req.body;
   try {
-    const updatedStage = await CompetitionStage.findByIdAndUpdate(req.params.id, {
+    const updatedStage = await CompetitionStage.findByIdAndUpdate(req.params.stageId, {
       name,
       description,
       stageNumber,
@@ -61,9 +61,9 @@ router.put('/:competitionId/stages/:id', async (req, res) => {
 });
 
 // Delete a stage
-router.delete('/:competitionId/stages/:id', async (req, res) => {
+router.delete('/:competitionId/:stageId', async (req, res) => {
   try {
-    await CompetitionStage.findByIdAndDelete(req.params.id);
+    await CompetitionStage.findByIdAndDelete(req.params.stageId);
     res.status(200).json('Stage has been deleted...');
   } catch (error) {
     res.status(500).json({ error: error.message });
