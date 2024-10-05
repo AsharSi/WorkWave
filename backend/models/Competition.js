@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const CompetitionSchema = new mongoose.Schema({
-  companyId: {
+  recruiterId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Company",
+    ref: "Recruiter",
     required: true,
   },
   name: { type: String, required: true },

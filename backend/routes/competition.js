@@ -5,10 +5,10 @@ const router = express.Router();
 
 // Create a new competition
 router.post('/', async (req, res) => {
-    const { companyId, name, description, startDate, endDate, registrationDeadline, maxParticipants } = req.body;
+    const { reqruiterId, name, description, startDate, endDate, registrationDeadline, maxParticipants } = req.body;
     try {
         const newCompetition = new Competition({
-            companyId,
+            reqruiterId,
             name,
             description,
             startDate,
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
 // Get all competitions
 router.get('/', async (req, res) => {
     try {
-        const competitions = await Competition.find().populate('companyId');
+        const competitions = await Competition.find().populate('reqruiterId');
         res.status(200).json(competitions);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
 // Get a competition by ID
 router.get('/:id', async (req, res) => {
     try {
-        const competition = await Competition.findById(req.params.id).populate('companyId');
+        const competition = await Competition.findById(req.params.id).populate('reqruiterId');
         if (!competition) return res.status(404).json({ message: 'Competition not found' });
         res.status(200).json(competition);
     } catch (error) {
@@ -49,7 +49,7 @@ router.put('/:id', async (req, res) => {
     const { companyId, name, description, startDate, endDate, registrationDeadline, maxParticipants } = req.body;
     try {
         const updatedCompetition = await Competition.findByIdAndUpdate(req.params.id, {
-            companyId,
+            reqruiterId,
             name,
             description,
             startDate,

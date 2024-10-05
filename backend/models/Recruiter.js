@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const CompanySchema = new mongoose.Schema(
+const RecruiterSchema = new mongoose.Schema(
   {
-    company_name: {
+    recruiter: {
       type: String,
       required: true,
     },
@@ -38,6 +38,6 @@ const CompanySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Company = mongoose.model("Company", CompanySchema);
+const Recruiter = mongoose.model("Recruiter", RecruiterSchema);
 
-export default Company;
+export default Recruiter;

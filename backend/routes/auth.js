@@ -1,7 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcryptjs from 'bcryptjs';
-import Company from "../models/Company.js";
+import Recruiter from "../models/Recruiter.js";
 import { errorHandler } from "../utils/error.js";
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -14,12 +14,12 @@ router.post("/register", async (req, res, next) => {
         const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
 
         const email = req.body.email;
-        const existingCompany = await Company.findOne ({ email });
+        const existingRecruiter = await Recruiter.findOne({ email });
 
-        if (existingCompany) return next(errorHandler(400, "Company already exists!"));
+        if (existingRecruiter) return next(errorHandler(400, "Recruiter already exists!"));
 
-        const newCompany = new Company({
-            company_name: req.body.company_name,
+        const newRecruiter = new Recruiter({
+            recruiter: req.body.recruiter,
             email: req.body.email,
             description: req.body.description,
             phoneNumber: req.body.phoneNumber,
@@ -28,10 +28,10 @@ router.post("/register", async (req, res, next) => {
             password: hashedPassword
         });
 
-        const savedCompany = await newCompany.save();
+        const savedRecruiter = await newRecruiter.save();
 
-        const token = jwt.sign({ id: savedCompany._id, isAdmin: savedCompany.isAdmin }, process.env.JWT_SECRET);
-        const { password: pass, ...rest } = savedCompany._doc;
+        const token = jwt.sign({ id: savedRecruiter._id, isAdmin: savedRecruiter.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = savedRecruiter._doc;
         res
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)
@@ -46,12 +46,12 @@ router.post("/register", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const validCompany = await Company.findOne({ email });
-        if (!validCompany) return next(errorHandler(404, "Company not found!"));
-        const validPassword = await bcryptjs.compareSync(password, validCompany.password);
+        const validRecruiter = await Recruiter.findOne({ email });
+        if (!validRecruiter) return next(errorHandler(404, "Recruiter not found!"));
+        const validPassword = await bcryptjs.compareSync(password, validRecruiter.password);
         if (!validPassword) return next(errorHandler(401, "Wrong Credentials!"));
-        const token = jwt.sign({ id: validCompany._id, isAdmin: validCompany.isAdmin }, process.env.JWT_SECRET);
-        const { password: pass, ...rest } = validCompany._doc;
+        const token = jwt.sign({ id: validRecruiter._id, isAdmin: validRecruiter.isAdmin }, process.env.JWT_SECRET);
+        const { password: pass, ...rest } = validRecruiter._doc;
         res
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)
@@ -64,10 +64,10 @@ router.post("/login", async (req, res, next) => {
 // O-AUTH
 router.post("/google", async (req, res, next) => {
     try {
-        const Company = await Company.findOne({ email: req.body.email });
-        if (Company) {
-            const token = jwt.sign({ id: Company._id }, process.env.JWT_SECRET);
-            const { password: pass, ...rest } = Company._doc;
+        const Recruiter = await Recruiter.findOne({ email: req.body.email });
+        if (Recruiter) {
+            const token = jwt.sign({ id: Recruiter._id }, process.env.JWT_SECRET);
+            const { password: pass, ...rest } = Recruiter._doc;
             res
                 .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
                 .status(200)
@@ -75,7 +75,7 @@ router.post("/google", async (req, res, next) => {
         } else {
             const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
             const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
-            const newCompany = new Company({
+            const newRecruiter = new Recruiter({
                 company_name: req.body.company_name,
                 email: req.body.email,
                 password: hashedPassword,
@@ -83,15 +83,15 @@ router.post("/google", async (req, res, next) => {
                 phoneCode: req.body.phoneCode,
                 country: req.body.country
             });
-            await newCompany.save();
+            await newRecruiter.save();
             const token = jwt.sign(
                 {
-                    id: Company._id,
-                    isAdmin: Company.isAdmin,
+                    id: Recruiter._id,
+                    isAdmin: Recruiter.isAdmin,
                 },
                 process.env.JWT_SECRET
             );
-            const { password: pass, ...rest } = newCompany._doc;
+            const { password: pass, ...rest } = newRecruiter._doc;
             res
                 .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
                 .status(200)
@@ -107,7 +107,7 @@ router.post("/google", async (req, res, next) => {
 router.post("/logout", async (req, res, next) => {
     try {
         res.clearCookie('access_token');
-        res.status(200).json("Company has been logged out!");
+        res.status(200).json("Recruiter has been logged out!");
     } catch (error) {
         next(error)
     }
@@ -117,17 +117,17 @@ router.post("/logout", async (req, res, next) => {
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
-        const Company = await Company.findOne({ email });
+        const Recruiter = await Recruiter.findOne({ email });
 
-        if (!Company) {
-            return res.status(404).json({ message: 'Company not found' });
+        if (!Recruiter) {
+            return res.status(404).json({ message: 'Recruiter not found' });
         }
 
         // Generate reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
-        Company.resetPasswordToken = resetToken;
-        Company.resetPasswordExpires = Date.now() + 300000; // Token expires in 5 minutes
-        await Company.save();
+        Recruiter.resetPasswordToken = resetToken;
+        Recruiter.resetPasswordExpires = Date.now() + 300000; // Token expires in 5 minutes
+        await Recruiter.save();
 
         // Send email with reset link
         const transporter = nodemailer.createTransport({
@@ -141,7 +141,7 @@ router.post('/forgot-password', async (req, res) => {
         })
         const mailOptions = {
             from: 'josaacounsellors@gmail.com',
-            to: Company.email,
+            to: Recruiter.email,
             subject: 'Password Reset Request',
             text: `Click on this link to reset your password: http://localhost:5173/reset/${resetToken}`
         };
@@ -167,24 +167,24 @@ router.post('/reset-password/:token', async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
 
-        // Find Company by reset token
-        const Company = await Company.findOne({ resetPasswordToken: token });
+        // Find Recruiter by reset token
+        const Recruiter = await Recruiter.findOne({ resetPasswordToken: token });
 
-        if (!Company) {
+        if (!Recruiter) {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
         // Check if token is expired
-        if (Company.resetPasswordExpires < Date.now()) {
+        if (Recruiter.resetPasswordExpires < Date.now()) {
             return res.status(400).json({ message: 'Token has expired' });
         }
 
-        // Hash password and save to Company
+        // Hash password and save to Recruiter
         const hashedPassword = bcryptjs.hashSync(password, 10);
-        Company.password = hashedPassword;
-        Company.resetPasswordToken = undefined;
-        Company.resetPasswordExpires = undefined;
-        await Company.save();
+        Recruiter.password = hashedPassword;
+        Recruiter.resetPasswordToken = undefined;
+        Recruiter.resetPasswordExpires = undefined;
+        await Recruiter.save();
 
         res.json({ message: 'Password reset successful' });
     } catch (error) {
