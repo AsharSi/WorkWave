@@ -1,35 +1,27 @@
-import { signIn, signOut, auth } from "@/lib/auth";
+import SlimSidebar from "@/components/home/Sidebar";
+import Competitions from "@/components/home/CompetitionComponent";
+import "./home.css";
+import { getCompetitionsByRecruiter } from "../actions/competitionActions";
+
 
 export default async function Home() {
-  const session = await auth();
+  const response = await getCompetitionsByRecruiter("1");
+  const competitions = await response?.json();
 
-  console.log(session);
-
-  if (session?.user)
-    return (
-      <>
-        <h1>Hello, {session?.user?.name}!</h1>
-        <form
-          action={async () => {
-            "use server";
-            await signOut();
-          }}
-        >
-          <button type="submit">Sign out</button>
-        </form>
-      </>
-    );
-  else
-    return (
-      <>
-        <form
-          action={async () => {
-            "use server";
-            await signIn();
-          }}
-        >
-          <button type="submit">Sign in</button>
-        </form>
-      </>
-    );
+  return (
+    <>
+      <div className="h-custom flex">
+        <SlimSidebar />
+        {competitions.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-lg text-muted-foreground">
+              No competitions found
+            </p>
+          </div>
+        ) : (
+          <Competitions competitions={competitions} />
+        )}
+      </div>
+    </>
+  );
 }

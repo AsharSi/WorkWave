@@ -1,0 +1,40 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+interface Competition {
+  _id: string;
+  name: string;
+  description: string;
+}
+
+export default function Competitions({
+  competitions,
+}: {
+  competitions: Competition[];
+}) {
+
+
+  return (
+    <ScrollArea className="h-custom p-6 w-full ">
+      {competitions.map((competition, index) => (
+        <Link href={`/competition/${competition._id}`} key={index} className="block mb-4">
+          <Card key={index} className="w-full">
+            <CardHeader>
+              <CardTitle>{competition.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>{competition.description}</CardDescription>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </ScrollArea>
+  );
+}

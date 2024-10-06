@@ -1,6 +1,6 @@
 "use server"
 
-import { signIn } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
 
 
@@ -22,4 +22,16 @@ export async function handleCredentialsSignIn({ email, password }: { email: stri
         }
         throw error;
     }
+}
+
+export async function handleGoogleSignIn() {
+    await signIn("google", { callbackUrl: "/" });
+}
+
+export async function handleLinkedInSingIn() {
+    await signIn("linkedin", { callbackUrl: "/" });
+}
+
+export async function handleSignOut() {
+    await signOut();
 }

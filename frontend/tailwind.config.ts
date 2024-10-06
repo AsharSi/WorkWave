@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+      height: {
+        custom: 'var(--custom-height)'
+      },
   		colors: {
         default: {
           DEFAULT: 'hsl(var(--default))',

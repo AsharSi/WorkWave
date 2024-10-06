@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Navbar from "@/components/navbar/Navbar";
 
 export default async function ProtectedLayout({
   children,
@@ -10,5 +11,10 @@ export default async function ProtectedLayout({
 
   if (!session?.user) redirect("/login");
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }
