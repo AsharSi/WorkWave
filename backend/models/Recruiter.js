@@ -18,6 +18,10 @@ const RecruiterSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    credits: {
+      type: Number,
+      default: 500,
+    },
     phoneNumber: {
       type: Number,
     },

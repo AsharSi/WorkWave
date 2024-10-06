@@ -42,6 +42,16 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get all competitions by recruiter ID
+router.get('/recruiter/:recruiterId', async (req, res) => {
+    try {
+        const competitions = await Competition.find({ recruiterId: req.params.recruiterId });
+        res.status(200).json(competitions);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get a competition by ID
 router.get('/:id', async (req, res) => {
     try {
