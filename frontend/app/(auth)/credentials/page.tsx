@@ -8,8 +8,9 @@ export default async function SignIn() {
 
   return (
     <form
-      action={async (formData) => {
-        await signIn("credentials", formData);
+      action={async (formdata) => {
+        "use server";
+        await signIn("credentials", formdata);
       }}
     >
       <label>

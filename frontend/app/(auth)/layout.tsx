@@ -1,14 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
+  console.log(session);
+
+  if (session?.user) {
+    redirect("/");
+  }
+
   return (
     <>
-      <div className="bg-primary-foreground flex flex-col items-center justify-center md:h-screen relative p-4 md:p-0 h-screen">
+      <div className="bg-default-foreground flex flex-col items-center justify-center md:h-screen relative p-4 md:p-0 h-screen">
         <div className="absolute top-2 left-0 max-w-[220px]">
           <Link href="/">
             <Image

@@ -17,7 +17,7 @@ interface InputProps {
             value={value}
             onChange={onChange}
             autoComplete="off"
-            className="w-full px-2 py-3 border-1 bg-white outline-none rounded-md text-black placeholder:text-gray-400 placeholder:font-semibold placeholder:text-l focus:border-primary-foreground focus:font-semibold  hover:border-primary-foreground transition-all duration-300"
+            className="w-full px-2 py-3 border-1 bg-white outline-none rounded-md text-black placeholder:text-gray-400 placeholder:font-semibold placeholder:text-l focus:border-default-foreground focus:font-semibold  hover:border-default-foreground transition-all duration-300"
           />
       </>
     );

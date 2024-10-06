@@ -240,12 +240,12 @@ const RegisterPage: React.FC = () => {
               placeholder="Enter OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              className="w-full px-4 py-3 border-1 bg-white outline-none rounded-md text-[#222] placeholder:text-gray-400 placeholder:font-semibold  focus:border-primary-foreground font-medium hover:border-primary-foreground transition-all duration-300"
+              className="w-full px-4 py-3 border-1 bg-white outline-none rounded-md text-[#222] placeholder:text-gray-400 placeholder:font-semibold  focus:border-default-foreground font-medium hover:border-default-foreground transition-all duration-300"
             />
             <button
               type="button"
               onClick={otpSent ? verifyOTP : sendOTP}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-white py-1 px-3 rounded-md text-sm font-medium transition-all duration-200"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-default text-white py-1 px-3 rounded-md text-sm font-medium transition-all duration-200"
             >
               {otpSent
                 ? isOTPVerifing
@@ -263,7 +263,7 @@ const RegisterPage: React.FC = () => {
             type="checkbox"
             checked={agreeToTerms}
             onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="form-checkbox h-8 w-8 accent-primary transition duration-150 ease-in-out "
+            className="form-checkbox h-8 w-8 accent-default transition duration-150 ease-in-out "
           />
           <span className="text-gray-800 text-xs font-medium">
             All your information is collected, stored, and processed as per our
@@ -288,14 +288,14 @@ const RegisterPage: React.FC = () => {
         <div className="flex justify-between items-center mt-16 ">
           <div className="text-gray-500 font-semibold">
             <span className="text-sm">Already have an account? </span>{" "}
-            <Link href={"/login"} className="text-primary font-semibold">
+            <Link href={"/login"} className="text-default font-semibold">
               Sign In
             </Link>
           </div>
           <div className="flex space-x-6 mb-1">
             <button
               type="submit"
-              className="bg-primary text-white px-6 py-3 rounded-full font-bold flex items-center space-x-2 hover:scale-105 duration-200 md:text-xl h-1/2  "
+              className="bg-default text-white px-6 py-3 rounded-full font-bold flex items-center space-x-2 hover:scale-105 duration-200 md:text-xl h-1/2  "
             >
               <span>Sign Up</span>
               <Image

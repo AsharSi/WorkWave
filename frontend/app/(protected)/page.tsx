@@ -1,4 +1,3 @@
-
 import { signIn, signOut, auth } from "@/lib/auth";
 
 export default async function Home() {

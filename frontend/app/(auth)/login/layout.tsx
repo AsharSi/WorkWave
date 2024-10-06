@@ -67,7 +67,7 @@ export default function AuthLayout({
         </span>
         <div className="w-1/3 border-b border-gray-300 ml-4 "></div>
       </div>
-      
+
       {children}
     </>
   );

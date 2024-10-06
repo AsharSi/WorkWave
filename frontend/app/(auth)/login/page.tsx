@@ -177,7 +177,7 @@ const AuthForm: React.FC = () => {
 
           <div
             onClick={() => setIsOtpLogin(!isOtpLogin)}
-            className="text-primary text-left font-semibold px-4"
+            className="text-default text-left font-semibold px-4"
           >
             {isOtpLogin ? "Login with Password" : "Login via OTP"}
           </div>
@@ -191,9 +191,9 @@ const AuthForm: React.FC = () => {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               autoComplete="off"
-              className="w-full px-2 py-3 border-1 bg-white outline-none rounded-md text-black placeholder:text-gray-400 placeholder:font-semibold placeholder:text-l focus:border-primary-foreground focus:font-semibold  hover:border-primary-foreground transition-all duration-300"
+              className="w-full px-2 py-3 border-1 bg-white outline-none rounded-md text-black placeholder:text-gray-400 placeholder:font-semibold placeholder:text-l focus:border-default-foreground focus:font-semibold  hover:border-default-foreground transition-all duration-300"
             />
-            <button className="font-semibold text-left text-primary px-4 absolute bottom-0 translate-y-full ">
+            <button className="font-semibold text-left text-default px-4 absolute bottom-0 translate-y-full ">
               Didn&apos;t Receive OTP yet?
             </button>
             <button
@@ -215,7 +215,7 @@ const AuthForm: React.FC = () => {
             />
             <div
               onClick={handleForgotPassword}
-              className="font-semibold text-primary text-left px-4 "
+              className="font-semibold text-default text-left px-4 "
             >
               Forgot Password
             </div>
@@ -224,13 +224,13 @@ const AuthForm: React.FC = () => {
         <div className="flex justify-between items-center mt-12 mb-4">
           <div className="text-gray-500 font-semibold">
             <span className="text-sm">Don&apos;t have an account? &nbsp;</span>{" "}
-            <Link href="/register" className="text-primary font-semibold">
+            <Link href="/register" className="text-default font-semibold">
               Register
             </Link>
           </div>
           <button
             type="submit"
-            className="bg-primary text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 duration-200 md:text-xl "
+            className="bg-default text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 duration-200 md:text-xl "
           >
             <span>Sign In</span>
             <Image
