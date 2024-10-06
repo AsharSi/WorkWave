@@ -6,23 +6,17 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter"
 import client from "@/lib/mongodb"
 import { saltAndHashPassword } from "@/utils/password"
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     LinkedIn,
     Google,
-    // Credentials not working yet
+    // Credential provider is not working yet with mongodbadapter
     Credentials({
       credentials: {
         email: { label: "Email", type: "email", placeholder: "Email" },
         password: { label: "Password", type: "password", placeholder: "Password" },
       },
-      authorize: async (credentials) => {
+      async authorize (credentials)  {
         let user = null
         const pwHash = await saltAndHashPassword(credentials.password as string)
 
@@ -39,13 +33,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        user = {
-          id: "1",
-          name: "John Doe",
-          email: "johndoe@gmail.com",
-        };
-
-        console.log("user", user)
         return user;
       },
     }),

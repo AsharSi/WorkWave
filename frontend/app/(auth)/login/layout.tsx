@@ -1,5 +1,8 @@
 import Image from "next/image";
-import { signIn } from "@/lib/auth";
+import {
+  handleGoogleSignIn,
+  handleLinkedInSingIn,
+} from "@/app/actions/authActions";
 
 export default function AuthLayout({
   children,
@@ -18,18 +21,13 @@ export default function AuthLayout({
         </div>
       </div>
 
-      <form
-        action={async () => {
-          "use server";
-          await signIn("google", { redirectTo: "/dashboard" });
-        }}
-      >
+      <form action={handleGoogleSignIn}>
         <button
           type="submit"
           className="flex items-center justify-center w-full bg-white text-gray-500 md:shadow p-3 border-1 rounded-l space-x-2  font-semibold transition-all duration-300 hover:shadow-sm hover:transform hover:scale-[1.02] text-lg"
         >
           <Image
-            src={"/images/Google_Icons-09-512.png"}
+            src={"/auth/google.svg"}
             alt="Google"
             width={100}
             height={100}
@@ -39,18 +37,13 @@ export default function AuthLayout({
         </button>
       </form>
 
-      <form
-        action={async () => {
-          "use server";
-          await signIn("linkedin", { redirectTo: "/dashboard" });
-        }}
-      >
+      <form action={handleLinkedInSingIn}>
         <button
           type="submit"
           className="flex items-center justify-center w-full bg-white text-gray-500 md:shadow p-3 border-1 rounded-l space-x-2  font-semibold transition-all duration-300 hover:shadow-sm hover:transform hover:scale-[1.02] text-lg"
         >
           <Image
-            src={"/images/Google_Icons-09-512.png"}
+            src={"/auth/linkedin.svg"}
             alt="Google"
             width={100}
             height={100}
