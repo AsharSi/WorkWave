@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 import bcryptjs from 'bcryptjs';
 import Recruiter from "../models/Recruiter.js";
 import { errorHandler } from "../utils/error.js";
@@ -9,14 +10,17 @@ import nodemailer from 'nodemailer';
 const router = express.Router();
 
 //REGISTER
-router.post("/register", async (req, res, next) => {
+router.post("/register/:userId", async (req, res, next) => {
     try {
         const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
 
         const email = req.body.email;
-        const existingRecruiter = await Recruiter.findOne({ email });
 
-        if (existingRecruiter) return next(errorHandler(400, "Recruiter already exists!"));
+        const existingUser = await User.findById(req.params.userId);
+        if (!existingUser) return next(errorHandler(404, "User not found!"));
+
+        const existingRecruiter = await Recruiter.findOne({ email });
+        if (existingRecruiter) return next(errorHandler(400, "Company already exists!"));
 
         const newRecruiter = new Recruiter({
             recruiter: req.body.recruiter,
@@ -24,14 +28,21 @@ router.post("/register", async (req, res, next) => {
             description: req.body.description,
             phoneNumber: req.body.phoneNumber,
             phoneCode: req.body.phoneCode,
-            country: req.body.country,
+            location: req.body.location,
+            websiteLink: req.body.websiteLink,
+            linkedInLink: req.body.linkedInLink,
+            credits: req.body.credits,
             password: hashedPassword
         });
 
         const savedRecruiter = await newRecruiter.save();
 
+        existingUser.recruiter = savedRecruiter._id;
+        await existingUser.save();
+
         const token = jwt.sign({ id: savedRecruiter._id, isAdmin: savedRecruiter.isAdmin }, process.env.JWT_SECRET);
         const { password: pass, ...rest } = savedRecruiter._doc;
+
         res
             .cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) })
             .status(200)

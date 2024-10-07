@@ -32,12 +32,14 @@ const RecruiterSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    country: {
+    websiteLink: {
       type: String,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    linkedInLink: {
+      type: String,
+    },
+    location: {
+      type: String,
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
