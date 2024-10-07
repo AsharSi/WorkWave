@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Input from "../Input";
+import Input from "../InputBox";
+import { Button } from "@/components/ui/button";
 // import CountryCode from "../misc/CountryFlag";
 import { useUserStore } from "@/utils/userStore";
 
@@ -160,8 +161,6 @@ const AuthForm: React.FC = () => {
 
   return (
     <>
-     
-
       <form
         onSubmit={isOtpLogin ? verifyOTPforlogin : handleSubmitLogin}
         className="flex flex-col justify-between gap-4 lg:h-[60%] xl:h-1/2"
@@ -184,7 +183,7 @@ const AuthForm: React.FC = () => {
         </div>
 
         {isOtpLogin ? (
-          <div className="relative w-full flex flex-col gap-1">
+          <div className="relative w-full flex flex-col">
             <input
               type="text"
               placeholder="Enter OTP"
@@ -228,19 +227,19 @@ const AuthForm: React.FC = () => {
               Register
             </Link>
           </div>
-          <button
+          <Button
             type="submit"
-            className="bg-default text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 duration-200 md:text-xl "
+            className="bg-default text-white pl-4 pr-2 py-6 rounded-full flex items-center gap-3 hover:scale-105 hover:bg-default transition-all duration-200  "
           >
-            <span>Sign In</span>
+            <span className="font-bold md:text-xl">Sign In</span>
             <Image
-              src={"/images/Arrow.png"}
-              alt="Sign Up Icon"
-              className="w-8 h-8"
+              src={"/auth/arrow.svg"}
+              alt="arrow"
+              className="w-8 h-8 -rotate-90"
               width={100}
               height={100}
             />
-          </button>
+          </Button>
         </div>
       </form>
     </>

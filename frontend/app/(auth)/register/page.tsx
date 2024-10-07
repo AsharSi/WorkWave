@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Input from "../Input";
+import InputBox from "../InputBox";
 import { useUserStore } from "@/utils/userStore";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const RegisterPage: React.FC = () => {
   const router = useRouter();
@@ -21,14 +23,10 @@ const RegisterPage: React.FC = () => {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    companyName: "",
     password: "",
     role: "user",
   });
-
-  const validatePhone = (phone: string) => {
-    return /^\d{10}$/.test(phone);
-  };
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,7 +47,7 @@ const RegisterPage: React.FC = () => {
       !user.firstName ||
       !user.lastName ||
       !user.email ||
-      !user.phone ||
+      !user.companyName ||
       !user.password
     ) {
       toast.error("Please fill in all fields.");
@@ -57,10 +55,6 @@ const RegisterPage: React.FC = () => {
     }
     if (!validateEmail(user.email)) {
       toast.error("Please enter a valid email address");
-      return;
-    }
-    if (!validatePhone(user.phone)) {
-      toast.error("Please enter a valid 10-digit phone number.");
       return;
     }
 
@@ -123,7 +117,7 @@ const RegisterPage: React.FC = () => {
       !user.firstName ||
       !user.lastName ||
       !user.email ||
-      !user.phone ||
+      !user.companyName ||
       !user.password
     ) {
       toast.error("Please fill in all fields.");
@@ -131,10 +125,6 @@ const RegisterPage: React.FC = () => {
     }
     if (!validateEmail(user.email)) {
       toast.error("Please enter a valid email address");
-      return;
-    }
-    if (!validatePhone(user.phone)) {
-      toast.error("Please enter a valid 10-digit phone number.");
       return;
     }
     if (!otpVerified) {
@@ -155,9 +145,8 @@ const RegisterPage: React.FC = () => {
           first_name: user.firstName,
           last_name: user.lastName,
           name: `${user.firstName} ${user.lastName}`,
-          phone: user.phone,
+          companyName: user.companyName,
           password: user.password,
-          role: "user",
         }),
       });
 
@@ -188,14 +177,14 @@ const RegisterPage: React.FC = () => {
 
       <form onSubmit={handleSubmitSignUp} className="flex flex-col gap-y-2">
         <div className="flex flex-col md:flex-row gap-2 ">
-          <Input
+          <InputBox
             name="firstName"
             placeholder="First Name"
             type="text"
             value={user.firstName}
             onChange={handleChange}
           />
-          <Input
+          <InputBox
             name="lastName"
             placeholder="Last Name"
             type="text"
@@ -204,7 +193,7 @@ const RegisterPage: React.FC = () => {
           />
         </div>
 
-        <Input
+        <InputBox
           name="email"
           placeholder="Email"
           type="email"
@@ -212,22 +201,16 @@ const RegisterPage: React.FC = () => {
           onChange={handleChange}
         />
 
-        <div className="flex flex-col md:flex-row md:space-x-2 ">
-          <div className="flex items-center justify-evenly w-full max-w-[150px] border-2 rounded-md mb-4 md:mb-0">
-            {/* <CountryCode /> */}
-          </div>
-
-          <Input
-            name="phone"
-            placeholder="Phone Number"
-            type="phone"
-            value={user.phone}
-            onChange={handleChange}
-          />
-        </div>
+        <InputBox
+          name="companyName"
+          placeholder="Company Name"
+          type="text"
+          value={user.companyName}
+          onChange={handleChange}
+        />
 
         <div className="flex flex-col md:flex-row md:space-x-2 items-center">
-          <Input
+          <InputBox
             name="password"
             placeholder="Password"
             type="password"
@@ -235,12 +218,12 @@ const RegisterPage: React.FC = () => {
             onChange={handleChange}
           />
           <div className="relative w-full md:mt-0">
-            <input
+            <Input
               type="text"
               placeholder="Enter OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              className="w-full px-4 py-3 border-1 bg-white outline-none rounded-md text-[#222] placeholder:text-gray-400 placeholder:font-semibold  focus:border-default-foreground font-medium hover:border-default-foreground transition-all duration-300"
+              className="px-4 py-3 text-base h-auto placeholder:text-gray-400 placeholder:font-semibold "
             />
             <button
               type="button"
@@ -292,21 +275,19 @@ const RegisterPage: React.FC = () => {
               Sign In
             </Link>
           </div>
-          <div className="flex space-x-6 mb-1">
-            <button
-              type="submit"
-              className="bg-default text-white px-6 py-3 rounded-full font-bold flex items-center space-x-2 hover:scale-105 duration-200 md:text-xl h-1/2  "
-            >
-              <span>Sign Up</span>
-              <Image
-                src={"/images/Arrow.png"}
-                alt="Sign Up Icon"
-                className="w-6 h-6"
-                width={100}
-                height={100}
-              />
-            </button>
-          </div>
+          <Button
+            type="submit"
+            className="bg-default text-white pl-4 pr-2 py-6 rounded-full flex items-center gap-3 hover:scale-105 hover:bg-default transition-all duration-200  "
+          >
+            <span className="font-bold md:text-xl">Sign Up</span>
+            <Image
+              src={"/auth/arrow.svg"}
+              alt="arrow"
+              className="w-8 h-8 -rotate-90"
+              width={100}
+              height={100}
+            />
+          </Button>
         </div>
       </form>
     </>

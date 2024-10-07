@@ -17,12 +17,13 @@ export default function Navbar() {
     <nav className="bg-background border-b sticky top-0">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href={"/"} className="flex-shrink-0 flex items-center">
+          <Link href={"/"} className="flex-shrink-0 flex items-center overflow-hidden">
             <Image
               src={"/general/wizelogo.png"}
               alt="logo"
               width={300}
               height={64}
+              className=""
             ></Image>
           </Link>
           <div className="flex items-center">

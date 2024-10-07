@@ -12,8 +12,8 @@
 
 @layer base {
   :root {
-    --default: 260, 100%, 66%;
-    --default-foreground: 260, 100%, 94%;
+    --default: 214.34, 100%, 33.92%;
+    --default-foreground: 216, 100%, 96.08%;
 
     --custom-height: calc(100vh - 65px);
 
@@ -45,8 +45,8 @@
   }
 
   .dark {
-    --default: 260, 100%, 66%;
-    --default-foreground: 260, 100%, 94%;
+    --default: 214.34, 100%, 33.92%;
+    --default-foreground: 216, 100%, 96.08%;
 
     --custom-height: calc(100vh - 65px);
 

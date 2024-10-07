@@ -21,7 +21,7 @@ export default function AuthLayout({
         </div>
       </div>
 
-      <form action={handleGoogleSignIn}>
+      <form action={handleGoogleSignIn} className="mb-2">
         <button
           type="submit"
           className="flex items-center justify-center w-full bg-white text-gray-500 md:shadow p-3 border-1 rounded-l space-x-2  font-semibold transition-all duration-300 hover:shadow-sm hover:transform hover:scale-[1.02] text-lg"
