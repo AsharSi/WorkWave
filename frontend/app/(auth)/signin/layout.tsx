@@ -1,8 +1,11 @@
 import Image from "next/image";
 import {
+  handleCredentialsSignIn,
   handleGoogleSignIn,
   handleLinkedInSingIn,
-} from "@/app/actions/authActions";
+} from "@/actions/authActions";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
 
 export default function AuthLayout({
   children,
@@ -60,6 +63,38 @@ export default function AuthLayout({
         </span>
         <div className="w-1/3 border-b border-gray-300 ml-4 "></div>
       </div>
+
+      <form action={handleCredentialsSignIn}>
+        <div className="flex flex-col gap-2">
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="border-1 bg-white p-3 rounded-md text-black placeholder-gray-400 placeholder-semibold focus:border-default-foreground focus:font-semibold  hover:border-default-foreground transition-all duration-300"
+          />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="border-1 bg-white p-3 rounded-md text-black placeholder-gray-400 placeholder-semibold focus:border-default-foreground focus:font-semibold  hover:border-default-foreground transition-all duration-300"
+          />
+        </div>
+        <div className="flex justify-between items-center mt-12 mb-4">
+          <Button
+            type="submit"
+            className="bg-default text-white pl-4 pr-2 py-6 rounded-full flex items-center gap-3 hover:scale-105 hover:bg-default transition-all duration-200  "
+          >
+            <span className="font-bold md:text-xl">Sign In</span>
+            <Image
+              src={"/auth/arrow.svg"}
+              alt="arrow"
+              className="w-8 h-8 -rotate-90"
+              width={100}
+              height={100}
+            />
+          </Button>
+        </div>
+      </form>
 
       {children}
     </>

@@ -1,11 +1,6 @@
-import { signIn, auth } from "@/lib/auth";
+import { signIn } from "@/lib/auth";
 
 export default async function SignIn() {
-  const session = await auth();
-
-  console.log("session", session);
-  if (session?.user) return <p>Already signed in</p>;
-
   return (
     <form
       action={async (formdata) => {

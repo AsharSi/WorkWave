@@ -14,7 +14,7 @@ interface Competition {
   description: string;
 }
 
-export default function Competitions({
+export default async function Competitions({
   competitions,
 }: {
   competitions: Competition[];
@@ -24,7 +24,7 @@ export default function Competitions({
   return (
     <ScrollArea className="h-custom p-6 w-full ">
       {competitions.map((competition, index) => (
-        <Link href={`/competition/${competition._id}`} key={index} className="block mb-4">
+          <Link href={`/profiles/${competition._id}`} key={index} className="block text-black mb-4">
           <Card key={index} className="w-full">
             <CardHeader>
               <CardTitle>{competition.name}</CardTitle>
@@ -35,6 +35,6 @@ export default function Competitions({
           </Card>
         </Link>
       ))}
-    </ScrollArea>
-  );
+      </ScrollArea>
+    );
 }

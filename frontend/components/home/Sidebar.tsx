@@ -1,6 +1,7 @@
 import { Plus, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import SidebarCSS from "./Sidebar.module.css"
 
 export default function SlimSidebar() {
   return (
@@ -17,7 +18,7 @@ export default function SlimSidebar() {
       </Link>
       
       <div className="flex-grow flex items-center">
-        <p className="vertical-text text-sm font-medium text-muted-foreground">
+        <p className={`${SidebarCSS.verticalText} text-sm font-medium text-muted-foreground`}>
           All listing
         </p>
       </div>

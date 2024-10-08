@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Input from "../InputBox";
 import { Button } from "@/components/ui/button";
-// import CountryCode from "../misc/CountryFlag";
 import { useUserStore } from "@/utils/userStore";
 
 const AuthForm: React.FC = () => {
@@ -36,7 +35,6 @@ const AuthForm: React.FC = () => {
   };
 
   const handleSubmitLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    console.log("LoginviaPassword");
     e.preventDefault();
 
     if (!credentials.email || !credentials.password) {
@@ -223,7 +221,7 @@ const AuthForm: React.FC = () => {
         <div className="flex justify-between items-center mt-12 mb-4">
           <div className="text-gray-500 font-semibold">
             <span className="text-sm">Don&apos;t have an account? &nbsp;</span>{" "}
-            <Link href="/register" className="text-default font-semibold">
+            <Link href="/signup" className="text-default font-semibold">
               Register
             </Link>
           </div>

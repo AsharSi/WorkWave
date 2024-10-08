@@ -271,7 +271,7 @@ const RegisterPage: React.FC = () => {
         <div className="flex justify-between items-center mt-16 ">
           <div className="text-gray-500 font-semibold">
             <span className="text-sm">Already have an account? </span>{" "}
-            <Link href={"/login"} className="text-default font-semibold">
+            <Link href={"/signup"} className="text-default font-semibold">
               Sign In
             </Link>
           </div>
