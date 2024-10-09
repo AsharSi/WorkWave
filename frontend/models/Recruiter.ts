@@ -2,11 +2,19 @@ import mongoose from "mongoose";
 
 const RecruiterSchema = new mongoose.Schema(
   {
-    recruiter: {
+    name: {
       type: String,
       required: true,
     },
-    description: String,
+    userIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    description: {
+      type: String,
+    },
     competitions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Competition" },
     ],
@@ -47,4 +55,5 @@ const RecruiterSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Recruiter || mongoose.model("Recruiter", RecruiterSchema);
+export default mongoose.models.Recruiter ||
+  mongoose.model("Recruiter", RecruiterSchema);

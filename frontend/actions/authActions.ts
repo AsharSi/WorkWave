@@ -2,7 +2,13 @@
 import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
 
-export async function handleCredentialsSignIn(email: string, password: string) {
+export async function handleCredentialsSignIn({
+  email,
+  password,
+}: {
+  email: string,
+  password: string
+}) {
   try {
     await signIn("credentials", {
       email: email,
@@ -11,6 +17,7 @@ export async function handleCredentialsSignIn(email: string, password: string) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
+      console.error("AuthError", error);
       switch (error.type) {
         case "CredentialsSignin":
           return {
