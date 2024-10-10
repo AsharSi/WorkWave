@@ -2,18 +2,26 @@ import mongoose from "mongoose";
 
 const RecruiterSchema = new mongoose.Schema(
   {
-    recruiter: {
+    companyName: {
       type: String,
       required: true,
     },
-    description: String,
+    userIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    description: {
+      type: String,
+    },
     competitions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Competition" },
     ],
     competitionStages: [
       { type: mongoose.Schema.Types.ObjectId, ref: "CompetitionStage" },
     ],
-    email: {
+    companyEmail: {
       type: String,
       unique: true,
       required: true,
@@ -23,7 +31,7 @@ const RecruiterSchema = new mongoose.Schema(
       default: 500,
     },
     phoneNumber: {
-      type: Number,
+      type: String,
     },
     phoneCode: {
       type: String,
@@ -47,4 +55,5 @@ const RecruiterSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Recruiter || mongoose.model("Recruiter", RecruiterSchema);
+export default mongoose.models.Recruiter ||
+  mongoose.model("Recruiter", RecruiterSchema);

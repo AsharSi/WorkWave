@@ -6,7 +6,7 @@ import SidebarCSS from "./Sidebar.module.css"
 export default function SlimSidebar() {
   return (
     <div className="flex flex-col items-center w-16 h-custom py-8 bg-background border-r">
-      <Link href={"/profile"}>
+      <Link href={"/new-profile"}>
         <Button
           variant="ghost"
           size="icon"

@@ -27,12 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antaliased`}
-      >
-        <Toaster position="top-center" />
-        <SessionProvider>
+    <SessionProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antaliased`}
+        >
+          <Toaster position="top-center" />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -40,8 +40,8 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
-        </SessionProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </SessionProvider>
   );
 }

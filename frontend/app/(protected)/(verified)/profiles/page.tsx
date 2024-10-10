@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function CompetitionPage() {
+export default async function Profiles() {
   redirect("/");
 }
