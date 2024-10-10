@@ -9,8 +9,6 @@ export default async function ProtectedLayout({
 }) {
   const session = await auth();
 
-  console.log("session in protected", session);
-
   if (!session?.user) redirect("/signin");
 
   return (

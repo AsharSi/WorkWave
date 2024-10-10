@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const RecruiterSchema = new mongoose.Schema(
   {
-    name: {
+    companyName: {
       type: String,
       required: true,
     },
@@ -21,7 +21,7 @@ const RecruiterSchema = new mongoose.Schema(
     competitionStages: [
       { type: mongoose.Schema.Types.ObjectId, ref: "CompetitionStage" },
     ],
-    email: {
+    companyEmail: {
       type: String,
       unique: true,
       required: true,
@@ -31,7 +31,7 @@ const RecruiterSchema = new mongoose.Schema(
       default: 500,
     },
     phoneNumber: {
-      type: Number,
+      type: String,
     },
     phoneCode: {
       type: String,
