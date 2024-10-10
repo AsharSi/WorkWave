@@ -1,12 +1,12 @@
 import SlimSidebar from "@/components/home/Sidebar";
 import Competitions from "@/components/home/CompetitionComponent";
-import "./home.css";
-import { getCompetitionsByRecruiter } from "../actions/competitionActions";
+import { getAllCompetitionsByCompanyId } from "@/actions/competitionActions";
 
-
-export default async function Home() {
-  const response = await getCompetitionsByRecruiter("1");
-  const competitions = await response?.json();
+export default async function Home() {  
+  
+  const competitions = await getAllCompetitionsByCompanyId(
+    "6700cd8ee286b761e1fdee25"
+  );
 
   return (
     <>

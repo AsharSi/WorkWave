@@ -10,19 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { handleSignOut } from "@/app/actions/authActions";
+import { handleSignOut } from "@/actions/authActions";
 
 export default function Navbar() {
   return (
-    <nav className="bg-background border-b sticky top-0">
+    <nav className="bg-background border-b sticky top-0 z-30">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href={"/"} className="flex-shrink-0 flex items-center">
+          <Link
+            href={"/"}
+            className="flex-shrink-0 flex items-center overflow-hidden"
+          >
             <Image
               src={"/general/wizelogo.png"}
               alt="logo"
               width={300}
               height={64}
+              className="h-auto w-full max-w-[300px]"
             ></Image>
           </Link>
           <div className="flex items-center">

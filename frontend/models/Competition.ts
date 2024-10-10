@@ -32,6 +32,4 @@ const CompetitionSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-const Competition = mongoose.model("Competition", CompetitionSchema);
-
-export default Competition;
+export default mongoose.models.Competition || mongoose.model("Competition", CompetitionSchema);
