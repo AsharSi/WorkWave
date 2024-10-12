@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { verifyUsersCompanyProfile } from "@/actions/userActions";
 import { redirect } from "next/navigation";
 
 export default async function NotVerifiedLayout({
@@ -6,11 +6,11 @@ export default async function NotVerifiedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const response = await verifyUsersCompanyProfile();
 
-  console.log("session in verified layout", session);
+  console.log("session in verified layout", response);
 
-  if (!session?.user?.emailVerified) {   
+  if (response !== "verified") { 
     redirect("/get-started");
   }
 

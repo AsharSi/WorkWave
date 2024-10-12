@@ -3,23 +3,35 @@ import React, { useState, useTransition } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { createProfile } from "@/actions/profileActions";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { useForm, SubmitHandler } from "react-hook-form";
 
-type Inputs = {
-  title: string;
-  role: string;
-  description: string;
-  contacts: {
-    name: string;
-    email: string;
-    phoneNumber?: string;
-  };
-  location: string;
-  startDate: Date;
-  registrationDeadline: Date;
-  maxParticipants: number;
-};
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { setupCompetitionSchema } from "@/lib/zod";
 
 type InfoSection = {
   title: string;
@@ -45,12 +57,13 @@ const toolbarOptions = [
 ];
 
 const BlogForm = () => {
+  const { data: session } = useSession();
+
+  console.log("new profile ", session);
+
   const [isPending, startTransition] = useTransition();
   const [stage, setStage] = useState(0);
-
-  const recruiterId = "6700cbefa769a116f6015412";
-  const userId = "6700cbefa769a116f6015412";
-  const companyName = "MyLamp AI";
+  const userId = session?.user.id;
 
   const [infoSections, setInfoSections] = useState<InfoSection[]>([
     {
@@ -74,19 +87,20 @@ const BlogForm = () => {
     },
   ]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Inputs>();
+  const form = useForm<z.infer<typeof setupCompetitionSchema>>({
+    resolver: zodResolver(setupCompetitionSchema),
+  });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const { infoSectionFields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "infoSections",
+  });
+
+  const onSubmit = async (data: z.infer<typeof setupCompetitionSchema>) => {
     startTransition(async () => {
       const formData = {
         ...data,
-        recruiterId,
         userId,
-        companyName,
         contacts,
         infoSections,
       };
@@ -107,368 +121,502 @@ const BlogForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {stage === 0 && (
-          <>
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Job Title
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Job Title"
-                {...register("title", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {stage === 0 && (
+            <>
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        placeholder="Enter Job Title"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.title && (
-                <span className="text-red-500">This field is required</span>
-              )}
-            </div>
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Role
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Role"
-                {...register("role", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        placeholder="Enter Job Role"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Job Description
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Job Description"
-                {...register("description", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        placeholder="Enter Job Description"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Start Date
-              </label>
-              <input
-                type="date"
-                placeholder="Enter Start Date"
-                {...register("startDate", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Start Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Registration Deadline
-              </label>
-              <input
-                type="date"
-                placeholder="Enter Registration Deadline"
-                {...register("registrationDeadline", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>End Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Max Participants
-              </label>
-              <input
-                type="number"
-                placeholder="Enter Max Participants"
-                {...register("maxParticipants", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              <FormField
+                control={form.control}
+                name="registrationDeadline"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Registration Deadline</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <button
-              type="button"
-              onClick={() => setStage((curr) => curr + 1)}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Next
-            </button>
-          </>
-        )}
+              <FormField
+                control={form.control}
+                name="maxParticipants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Participants</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        placeholder="Enter max no. of Participants"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        {stage === 1 && (
-          <>
-            {infoSections.map((infoSection, index) => (
-              <div key={index} className="relative">
-                <input
-                  type="text"
-                  placeholder="Enter Info Section Title"
-                  value={infoSection.title}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  onChange={(e) => {
-                    const newInfoSections = [...infoSections];
-                    newInfoSections[index].title = e.target.value;
-                    setInfoSections(newInfoSections);
-                  }}
-                />
-                <ReactQuill
-                  value={infoSection.content}
-                  modules={{ toolbar: toolbarOptions }}
-                  onChange={(content) => {
-                    const newInfoSections = [...infoSections];
-                    newInfoSections[index].content = content;
-                    setInfoSections(newInfoSections);
-                  }}
-                  placeholder="Enter Info Section Content"
-                  theme="snow"
-                  className="mt-1"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newInfoSections = [...infoSections];
-                    newInfoSections.splice(index, 1);
-                    setInfoSections(newInfoSections);
-                  }}
-                  className="absolute top-0 right-0 p-2 text-red-500"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-
-            <div>
-              <button
+              <Button
                 type="button"
-                onClick={() =>
-                  setInfoSections([
-                    ...infoSections,
-                    {
-                      title: "",
-                      content: "",
-                    },
-                  ])
-                }
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                variant={"outline"}
+                onClick={() => setStage((curr) => curr + 1)}
               >
+                Next
+              </Button>
+            </>
+          )}
+
+          {stage === 1 && (
+            <>
+              {infoSectionFields.map((field, index) => (
+                <Card key={field.id}>
+                  <CardHeader>
+                    <CardTitle>Post {index + 1}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name={`posts.${index}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Post title" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`posts.${index}.content`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Content</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Post content" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {infoSectionFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => remove(index)}
+                      >
+                        Remove Post
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              
+              
+              <Button type="button" variant={"outline"} onClick={() => append({ title: '', content: '' })}>
                 Add Info Section
-              </button>
-            </div>
+              </Button>
 
-            <div>
-              <button
-                type="button"
-                onClick={() => setStage((curr) => curr - 1)}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setStage((curr) => curr + 1)}
-                className="inline-flex pr-4 justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-
-        {stage === 2 && (
-          <>
-            {rounds.map((round, index) => (
-              <div key={index} className="relative">
-                <input
-                  type="text"
-                  placeholder="Enter Round Title"
-                  value={round.title}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  onChange={(e) => {
-                    const newRounds = [...rounds];
-                    newRounds[index].title = e.target.value;
-                    setRounds(newRounds);
-                  }}
-                />
-
-                <ReactQuill
-                  value={round.content}
-                  modules={{ toolbar: toolbarOptions }}
-                  onChange={(content) => {
-                    const newRounds = [...rounds];
-                    newRounds[index].content = content;
-                    setRounds(newRounds);
-                  }}
-                  placeholder="Enter Round Description"
-                  theme="snow"
-                  className="mt-1"
-                />
-
-                <button
+              <div>
+                <Button
                   type="button"
-                  onClick={() => {
-                    const newRounds = [...rounds];
-                    newRounds.splice(index, 1);
-                    setRounds(newRounds);
-                  }}
-                  className="absolute top-0 right-0 p-2 text-red-500"
+                  variant={"outline"}
+                  onClick={() =>
+                    setInfoSections([
+                      ...infoSections,
+                      {
+                        title: "",
+                        content: "",
+                      },
+                    ])
+                  }
                 >
-                  Remove
-                </button>
+                  Add Info Section
+                </Button>
               </div>
-            ))}
 
-            <div>
-              <button
-                type="button"
-                onClick={() =>
-                  setRounds([
-                    ...rounds,
-                    {
-                      title: "",
-                      content: "",
-                    },
-                  ])
-                }
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Add New Round
-              </button>
-            </div>
+              <div className="space-x-2">
+                <Button
+                  type="button"
+                  variant={"outline"}
+                  onClick={() => setStage((curr) => curr - 1)}
+                >
+                  Prev
+                </Button>
+                <Button
+                  type="button"
+                  variant={"outline"}
+                  onClick={() => setStage((curr) => curr + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          )}
 
-            <div>
-              <button
-                type="button"
-                onClick={() => setStage((curr) => curr - 1)}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setStage((curr) => curr + 1)}
-                className="inline-flex pr-4 justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
+          {stage === 2 && (
+            <>
+              {rounds.map((round, index) => (
+                <div key={index} className="relative">
+                  <input
+                    type="text"
+                    placeholder="Enter Round Title"
+                    value={round.title}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    onChange={(e) => {
+                      const newRounds = [...rounds];
+                      newRounds[index].title = e.target.value;
+                      setRounds(newRounds);
+                    }}
+                  />
 
-        {stage === 3 && (
-          <>
-            <div>
-              <label className="block text-lg font-medium text-gray-700">
-                Job Location
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Job Location"
-                {...register("location", { required: true })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  <ReactQuill
+                    value={round.content}
+                    modules={{ toolbar: toolbarOptions }}
+                    onChange={(content) => {
+                      const newRounds = [...rounds];
+                      newRounds[index].content = content;
+                      setRounds(newRounds);
+                    }}
+                    placeholder="Enter Round Description"
+                    theme="snow"
+                    className="mt-1"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newRounds = [...rounds];
+                      newRounds.splice(index, 1);
+                      setRounds(newRounds);
+                    }}
+                    className="absolute top-0 right-0 p-2 text-red-500"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+
+              <div>
+                <Button
+                  variant={"outline"}
+                  type="button"
+                  onClick={() =>
+                    setRounds([
+                      ...rounds,
+                      {
+                        title: "",
+                        content: "",
+                      },
+                    ])
+                  }
+                >
+                  Add New Round
+                </Button>
+              </div>
+
+              <div className="space-x-2">
+                <Button
+                  variant={"outline"}
+                  type="button"
+                  onClick={() => setStage((curr) => curr - 1)}
+                >
+                  Prev
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setStage((curr) => curr + 1)}
+                  variant={"outline"}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          )}
+
+          {stage === 3 && (
+            <>
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Location</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        placeholder="Enter Job Location"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.location && (
-                <span className="text-red-500">This field is required</span>
-              )}
-            </div>
 
-            {contacts.map((contact, index) => (
-              <>
-                <div>
-                  <label className="block text-lg font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Name"
-                    value={contact.name}
-                    onChange={(e) => {
-                      const newContacts = [...contacts];
-                      newContacts[index].name = e.target.value;
-                      setContacts(newContacts);
-                    }}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                  {errors.contacts?.name && (
-                    <span className="text-red-500">This field is required</span>
-                  )}
-                </div>
+              {contacts.map((contact, index) => (
+                <>
+                  <div>
+                    <label className="block text-lg font-medium text-gray-700">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter Name"
+                      value={contact.name}
+                      onChange={(e) => {
+                        const newContacts = [...contacts];
+                        newContacts[index].name = e.target.value;
+                        setContacts(newContacts);
+                      }}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-lg font-medium text-gray-700">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="Enter Email"
-                    value={contact.email}
-                    onChange={(e) => {
-                      const newContacts = [...contacts];
-                      newContacts[index].email = e.target.value;
-                      setContacts(newContacts);
-                    }}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                  {errors.contacts?.email && (
-                    <span className="text-red-500">This field is required</span>
-                  )}
-                </div>
+                  <div>
+                    <label className="block text-lg font-medium text-gray-700">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Enter Email"
+                      value={contact.email}
+                      onChange={(e) => {
+                        const newContacts = [...contacts];
+                        newContacts[index].email = e.target.value;
+                        setContacts(newContacts);
+                      }}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-lg font-medium text-gray-700">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    value={contact.phoneNumber}
-                    onChange={(e) => {
-                      const newContacts = [...contacts];
-                      newContacts[index].phoneNumber = e.target.value;
-                      setContacts(newContacts);
-                    }}
-                    placeholder="Enter Phone Number"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-              </>
-            ))}
+                  <div>
+                    <label className="block text-lg font-medium text-gray-700">
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      value={contact.phoneNumber}
+                      onChange={(e) => {
+                        const newContacts = [...contacts];
+                        newContacts[index].phoneNumber = e.target.value;
+                        setContacts(newContacts);
+                      }}
+                      placeholder="Enter Phone Number"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                </>
+              ))}
 
-            <div>
-              <button
+              <div className="space-x-2">
+                <Button
+                  variant={"outline"}
+                  type="button"
+                  onClick={() => setStage((curr) => curr - 1)}
+                >
+                  Prev
+                </Button>
+                <Button
+                  type="button"
+                  variant={"outline"}
+                  onClick={() => setStage((curr) => curr + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          )}
+
+          {stage === 4 && (
+            <div className="space-x-2">
+              <Button
                 type="button"
+                variant={"outline"}
                 onClick={() => setStage((curr) => curr - 1)}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setStage((curr) => curr + 1)}
-                className="inline-flex pr-4 justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Next
-              </button>
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                Submit
+              </Button>
             </div>
-          </>
-        )}
-
-        {stage === 4 && (
-          <>
-            <button
-              type="button"
-              onClick={() => setStage((curr) => curr - 1)}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Prev
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Next
-            </button>
-          </>
-        )}
-      </form>
+          )}
+        </form>
+      </Form>
     </div>
   );
 };

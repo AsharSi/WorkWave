@@ -27,6 +27,7 @@ const CompetitionSchema = new mongoose.Schema({
       name: { type: String, required: true },
       email: { type: String, required: true },
       phoneNumber: { type: String },
+      phoneCode: { type: String },
     },
   ],
   location: { type: String, required: true },

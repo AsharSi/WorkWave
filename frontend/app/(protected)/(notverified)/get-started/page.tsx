@@ -6,7 +6,7 @@ export default async function Home() {
     <>
       <div className="h-custom flex justify-center items-center">
         <Button>
-          <Link href="/setup-profile">Create company's profile</Link>
+          <Link href="/setup-profile">Create company&apos;s profile</Link>
         </Button>
       </div>
     </>
