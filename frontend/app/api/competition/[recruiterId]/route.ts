@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import client from "@/lib/mongodb";
 
 // This function should handle the actual route, so the request and response need to be handled properly
-export async function GET(req: Request, { params }: { params: { recruiterId: string } }) {
-
-  
+export async function GET() {
   try {
     const db = client.db("mylampai-company");
     const collection = db.collection("competitions");
