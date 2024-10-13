@@ -37,7 +37,6 @@ type FormData = {
 
 export async function createProfile(formData: FormData) {
   try {
-    console.log("formdata ", formData)
     const userId = new mongoose.Types.ObjectId(formData.userId);
     const recruiter = await Recruiter.findOne({userIds: userId})
     

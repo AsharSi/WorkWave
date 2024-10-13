@@ -119,11 +119,7 @@ const JobForm = () => {
         userId,
       };
 
-      console.log("form data", formData);
-
       const result = await createProfile(formData);
-
-      console.log("result", result);
 
       if (result === "success") {
         toast.success("Profile created successfully");

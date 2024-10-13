@@ -8,8 +8,6 @@ export default async function NotVerifiedLayout({
 }) {
   const response = await verifyUsersCompanyProfile();
 
-  console.log("session in verified layout", response);
-
   if (response !== "verified") { 
     redirect("/get-started");
   }

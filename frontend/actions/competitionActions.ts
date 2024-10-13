@@ -1,7 +1,10 @@
 "use server";
 import Competition from "@/models/Competition";
 
-const getAllCompetitionsByUserId = async (userId: string) => {
+const getAllCompetitionsByUserId = async (userId: string | undefined) => {
+  if (!userId) {
+    return [];
+  }
   try {
     const competitions = await Competition.find({ userId });
     return competitions;

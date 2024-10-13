@@ -43,7 +43,6 @@ export default function SetupProfile() {
   const onSubmit = async (data: z.infer<typeof setupProfileSchema>) => {
     try {
       const response = await setUpCompanyProfile(data);
-      console.log(response);
       if (response === "success") { 
         toast.success("Company Profile Setup Successfully");
       }

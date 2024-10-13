@@ -10,24 +10,23 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Competition {
   _id: string;
-  name: string;
+  title: string;
   description: string;
 }
-
+  
 export default async function Competitions({
   competitions,
 }: {
   competitions: Competition[];
 }) {
-
-
+  
   return (
     <ScrollArea className="h-custom p-6 w-full ">
       {competitions.map((competition, index) => (
           <Link href={`/profiles/${competition._id}`} key={index} className="block text-black mb-4">
           <Card key={index} className="w-full">
             <CardHeader>
-              <CardTitle>{competition.name}</CardTitle>
+              <CardTitle>{competition.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>{competition.description}</CardDescription>

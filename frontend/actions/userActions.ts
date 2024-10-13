@@ -17,21 +17,15 @@ type FormData = {
 
 export async function setUpCompanyProfile(formData: FormData) {
   try {
-    console.log(formData);
     const session = await auth();
-    console.log(session);
 
     const user = await User.findOne({ email: session?.user?.email });
-
-    console.log(user);
-
+    
     const data = {
       ...formData,
       userIds: [user._id],
     };
 
-    console.log(data);
-    
     const recruiter = new Recruiter(data);
     
     await recruiter.save();
