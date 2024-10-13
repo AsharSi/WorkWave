@@ -1,9 +1,9 @@
 "use server";
 import Competition from "@/models/Competition";
 
-const getAllCompetitionsByCompanyId = async (recruiterId: string) => {
+const getAllCompetitionsByUserId = async (userId: string) => {
   try {
-    const competitions = await Competition.find({ recruiterId });
+    const competitions = await Competition.find({ userId });
     return competitions;
   } catch (error) {
     console.error(error);
@@ -21,4 +21,4 @@ const getCompetitionsByCompetitionId = async (competitionId: string) => {
   }
 };
 
-export { getAllCompetitionsByCompanyId, getCompetitionsByCompetitionId };
+export { getAllCompetitionsByUserId, getCompetitionsByCompetitionId };

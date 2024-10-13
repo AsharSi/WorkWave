@@ -1,12 +1,12 @@
 import SlimSidebar from "@/components/home/Sidebar";
 import Competitions from "@/components/home/CompetitionComponent";
 import { auth } from "@/lib/auth";
-import { getAllCompetitionsByCompanyId } from "@/actions/competitionActions";
+import { getAllCompetitionsByUserId } from "@/actions/competitionActions";
 
 export default async function Home() {  
   const session = await auth();
   
-  const competitions = await getAllCompetitionsByCompanyId(session?.user?.id);
+  const competitions = await getAllCompetitionsByUserId(session?.user?.id);
 
   return (
     <>
