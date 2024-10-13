@@ -1,11 +1,9 @@
 import Image from "next/image";
 import {
-  handleCredentialsSignIn,
   handleGoogleSignIn,
   handleLinkedInSingIn,
 } from "@/actions/authActions";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
+import Link from "next/link"
 
 export default function AuthLayout({
   children,
@@ -65,6 +63,11 @@ export default function AuthLayout({
       </div>
 
       {children}
+      
+      
+      <p className="mt-12 text-gray-500">
+        If you don&apos;t have an account, please <Link href="/signup" className="text-primary hover:underline">Create an account</Link>.
+      </p>
     </>
   );
 }

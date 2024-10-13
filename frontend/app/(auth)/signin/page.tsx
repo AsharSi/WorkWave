@@ -47,7 +47,7 @@ const SignIn: React.FC = () => {
     <>
       {globalError && <ErrorAlert message={globalError} />}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"

@@ -33,7 +33,7 @@ export default async function Component() {
         <CardHeader className="flex flex-row items-center gap-4">
           <Avatar className="w-16 h-16">
               <AvatarImage
-                src={session?.user?.image as string}
+                src={session?.user.image as string}
                 alt={"User avatar"}
                 className="w-16 h-16"
               />

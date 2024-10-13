@@ -12,9 +12,30 @@ const authConfig = {
   providers: [
     LinkedIn({
       allowDangerousEmailAccountLinking: true,
+      profile(profile) {
+        console.log("profile ", profile);
+        return {
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          emailVerified: profile.email_verified,
+        };
+      },
     }),
     Google({
-      allowDangerousEmailAccountLinking: true
+      allowDangerousEmailAccountLinking: true,
+      profile(profile) {
+        return {
+          name: profile.name as string,
+          email: profile.email as string,
+          image: profile.picture as string,
+          firstName: profile.given_name as string,
+          lastName: profile.family_name as string,
+          emailVerified: profile.email_verified,
+        };
+      },
     }),
     Credentials({
       credentials: {
@@ -29,7 +50,7 @@ const authConfig = {
         let user = null;
 
         const pwHash = await saltAndHashPassword(
-          credentials.password as string
+          credentials.password as string,
         );
 
         user = await client.db("mylampai-company").collection("users").findOne({

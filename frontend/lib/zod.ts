@@ -1,4 +1,4 @@
-import { array, object, string, date } from "zod";
+import { array, object, string, date, boolean } from "zod";
 
 export const signInSchema = object({
   email: string({ required_error: "Email is required" })
@@ -7,6 +7,29 @@ export const signInSchema = object({
   password: string({ required_error: "Password is required" })
     .min(6, "Password must be at least 6 characters")
     .max(32, "Password must be at most 32 characters"),
+});
+
+export const signUpSchema = object({
+  firstName: string()
+    .min(1, { message: "First name is required" })
+    .max(50, { message: "First name is too long" }),
+  lastName: string()
+    .min(1, { message: "Last name is required" })
+    .max(50, { message: "Last name is too long" }),
+  email: string().email({ message: "Invalid email address" }),
+  companyName: string().max(100, { message: "Company name is too long" }),
+  password: string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .regex(/[a-z]/, { message: "Password must contain a lowercase letter" })
+    .regex(/[A-Z]/, { message: "Password must contain an uppercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain a digit" })
+    .regex(/[@$!%*?&#]/, {
+      message: "Password must contain a special character",
+    }),
+  otp: string()
+    .length(6, { message: "OTP must be 6 digits" })
+    .regex(/^\d+$/, { message: "OTP must be numeric" }),
+  agreeToTerms: boolean().refine(val => val === true, { message: "You must accept the terms and conditions" }),
 });
 
 export const setupProfileSchema = object({
@@ -52,7 +75,7 @@ const infoSectionSchema = object({
   content: string({ required_error: "Content is required" })
     .min(20, "Content must be at least 20 characters")
     .max(1000, "Content must be at most 1000 characters"),
-})
+});
 
 const roundSchema = object({
   title: string({ required_error: "Title is required" })
@@ -61,7 +84,7 @@ const roundSchema = object({
   content: string({ required_error: "Content is required" })
     .min(20, "Content must be at least 20 characters")
     .max(500, "Content must be at most 500 characters"),
-})
+});
 
 const contactSchema = object({
   name: string({ required_error: "Name is required" })
@@ -78,7 +101,7 @@ const contactSchema = object({
     .min(2, "Phone Code must be at least 2 characters")
     .max(5, "Phone Code must be at most 5 characters")
     .optional(),
-})
+});
 
 export const setupCompetitionSchema = object({
   title: string({ required_error: "Title is required" })
@@ -97,9 +120,15 @@ export const setupCompetitionSchema = object({
   }),
   rounds: array(roundSchema).min(1, "Rounds must have at least 1 round"),
   maxParticipants: string({ required_error: "Max Participants is required" }),
-  infoSections: array(infoSectionSchema).min(1, "Info Sections must have at least 1 section"),
+  infoSections: array(infoSectionSchema).min(
+    1,
+    "Info Sections must have at least 1 section",
+  ),
   location: string({ required_error: "Location is required" })
     .min(3, "Location must be at least 3 characters")
     .max(32, "Location must be at most 32 characters"),
-  contacts: array(contactSchema).min(1, "Contacts must have at least 1 contact"),
+  contacts: array(contactSchema).min(
+    1,
+    "Contacts must have at least 1 contact",
+  ),
 });
