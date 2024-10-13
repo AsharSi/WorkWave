@@ -52,21 +52,19 @@ export default function Navbar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/dashboard">Profile</Link>
-                </DropdownMenuItem>
+                <Link href="/dashboard">
+                  <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>
-                  <form action={handleSignOut}>
-                    <Button
-                      variant={"ghost"}
-                      className="h-auto p-0 font-normal "
-                      type="submit"
-                    >
-                      Sign out
-                    </Button>
-                  </form>
-                </DropdownMenuItem>
+                <form action={handleSignOut}>
+                  <Button
+                    variant={"ghost"}
+                    className="h-auto p-0 font-normal w-full"
+                    type="submit"
+                  >
+                    <DropdownMenuItem className="w-full">Sign out</DropdownMenuItem>
+                  </Button>
+                </form>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button

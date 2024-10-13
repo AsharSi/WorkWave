@@ -4,6 +4,7 @@ import { Mail, User } from "lucide-react"
 import { auth } from "@/lib/auth";
 
 function stringToColor(string: string = '') {
+  string = string.toLowerCase();
   let hash = 0;
   for (let i = 0; i < string.length; i++) {
     hash = string.charCodeAt(i) + ((hash << 5) - hash);
