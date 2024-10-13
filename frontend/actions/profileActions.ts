@@ -4,6 +4,13 @@ import Recruiter from "@/models/Recruiter";
 import mongoose from "mongoose";
 import CompetitionStage from "@/models/CompetitionStage";
 
+type Round = {
+  title: string;
+  content: string;
+  maxScore?: number;
+  qualifiedCandidates?: string[];
+};
+
 type FormData = {
   userId: string | undefined;
   title: string;
@@ -24,33 +31,31 @@ type FormData = {
     phoneNumber?: string;
     phoneCode?: string;
   }[];
+  rounds: Round[];
 };
 
-type Round = {
-  title: string;
-  content: string;
-  maxScore?: number;
-  qualifiedCandidates?: string[];
-};
 
-export async function createProfile(formData: FormData, rounds: Round[]) {
+export async function createProfile(formData: FormData) {
   try {
+    console.log("formdata ", formData)
     const userId = new mongoose.Types.ObjectId(formData.userId);
     const recruiter = await Recruiter.findOne({userIds: userId})
     
+    const {rounds, ...restFormData} = formData;
+    
     const data = {
-      ...formData,
-      recruiterId: recruiter.recruiterId,
-      comapnyName: recruiter.companyName
+      ...restFormData,
+      recruiterId: recruiter._id,
+      companyName: recruiter.companyName
     }
     
     const competition = new Competition(data);
     const savedCompetition = await competition.save();
 
-    const newRounds = rounds.map((round) => {
+    const newRounds = rounds.map((round, index) => {
       return {
         ...round,
-        stageNumber: rounds.indexOf(round) + 1,
+        stageNumber: index + 1,
         competitionId: savedCompetition._id,
       };
     });

@@ -6,13 +6,21 @@ import { createProfile } from "@/actions/profileActions";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
+import phoneCode from "@/utils/phoneCode.json";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -22,7 +30,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -33,22 +41,6 @@ import {
 
 import { setupCompetitionSchema } from "@/lib/zod";
 
-type InfoSection = {
-  title: string;
-  content: string;
-};
-
-type Round = {
-  title: string;
-  content: string;
-};
-
-type Contact = {
-  name: string;
-  email: string;
-  phoneNumber?: string;
-};
-
 const toolbarOptions = [
   ["bold", "italic", "underline", "strike", "blockquote"],
   [{ list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
@@ -56,44 +48,68 @@ const toolbarOptions = [
   ["clean"],
 ];
 
-const BlogForm = () => {
+const JobForm = () => {
   const { data: session } = useSession();
-
-  console.log("new profile ", session);
-
   const [isPending, startTransition] = useTransition();
   const [stage, setStage] = useState(0);
   const userId = session?.user.id;
 
-  const [infoSections, setInfoSections] = useState<InfoSection[]>([
-    {
-      title: "",
-      content: "",
-    },
-  ]);
-
-  const [rounds, setRounds] = useState<Round[]>([
-    {
-      title: "",
-      content: "",
-    },
-  ]);
-
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      name: "",
-      email: "",
-      phoneNumber: "",
-    },
-  ]);
-
   const form = useForm<z.infer<typeof setupCompetitionSchema>>({
     resolver: zodResolver(setupCompetitionSchema),
+    defaultValues: {
+      title: "",
+      role: "",
+      description: "",
+      startDate: undefined,
+      endDate: undefined,
+      infoSections: [
+        {
+          title: "",
+          content: "",
+        },
+      ],
+      rounds: [
+        {
+          title: "",
+          content: "",
+        },
+      ],
+      contacts: [
+        {
+          name: "",
+          email: "",
+          phoneNumber: "",
+          phoneCode: "+91",
+        },
+      ],
+    },
   });
 
-  const { infoSectionFields, append, remove } = useFieldArray({
+  const {
+    fields: infoFields,
+    append: appendInfo,
+    remove: removeInfo,
+  } = useFieldArray({
     control: form.control,
     name: "infoSections",
+  });
+
+  const {
+    fields: roundFields,
+    append: appendRound,
+    remove: removeRound,
+  } = useFieldArray({
+    control: form.control,
+    name: "rounds",
+  });
+
+  const {
+    fields: contactFields,
+    append: appendContact,
+    remove: removeContact,
+  } = useFieldArray({
+    control: form.control,
+    name: "contacts",
   });
 
   const onSubmit = async (data: z.infer<typeof setupCompetitionSchema>) => {
@@ -101,13 +117,11 @@ const BlogForm = () => {
       const formData = {
         ...data,
         userId,
-        contacts,
-        infoSections,
       };
 
-      console.log("data", formData, rounds);
+      console.log("form data", formData);
 
-      const result = await createProfile(formData, rounds);
+      const result = await createProfile(formData);
 
       console.log("result", result);
 
@@ -339,20 +353,20 @@ const BlogForm = () => {
 
           {stage === 1 && (
             <>
-              {infoSectionFields.map((field, index) => (
+              {infoFields.map((field, index) => (
                 <Card key={field.id}>
                   <CardHeader>
-                    <CardTitle>Post {index + 1}</CardTitle>
+                    <CardTitle>Info: {index + 1}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <FormField
                       control={form.control}
-                      name={`posts.${index}.title`}
+                      name={`infoSections.${index}.title`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Title</FormLabel>
+                          <FormLabel>Info Title</FormLabel>
                           <FormControl>
-                            <Input placeholder="Post title" {...field} />
+                            <Input placeholder="Info title" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -360,22 +374,29 @@ const BlogForm = () => {
                     />
                     <FormField
                       control={form.control}
-                      name={`posts.${index}.content`}
+                      name={`infoSections.${index}.content`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Content</FormLabel>
+                          <FormLabel>Round Description</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Post content" {...field} />
+                            <ReactQuill
+                              modules={{ toolbar: toolbarOptions }}
+                              theme="snow"
+                              value={field.value}
+                              onChange={(content) => field.onChange(content)}
+                              placeholder="Round Description"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {infoSectionFields.length > 1 && (
+                    {infoFields.length > 1 && (
                       <Button
                         type="button"
                         variant="destructive"
-                        onClick={() => remove(index)}
+                        onClick={() => removeInfo(index)}
+                        className=""
                       >
                         Remove Post
                       </Button>
@@ -383,29 +404,14 @@ const BlogForm = () => {
                   </CardContent>
                 </Card>
               ))}
-              
-              
-              <Button type="button" variant={"outline"} onClick={() => append({ title: '', content: '' })}>
+
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => appendInfo({ title: "", content: "" })}
+              >
                 Add Info Section
               </Button>
-
-              <div>
-                <Button
-                  type="button"
-                  variant={"outline"}
-                  onClick={() =>
-                    setInfoSections([
-                      ...infoSections,
-                      {
-                        title: "",
-                        content: "",
-                      },
-                    ])
-                  }
-                >
-                  Add Info Section
-                </Button>
-              </div>
 
               <div className="space-x-2">
                 <Button
@@ -428,64 +434,65 @@ const BlogForm = () => {
 
           {stage === 2 && (
             <>
-              {rounds.map((round, index) => (
-                <div key={index} className="relative">
-                  <input
-                    type="text"
-                    placeholder="Enter Round Title"
-                    value={round.title}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    onChange={(e) => {
-                      const newRounds = [...rounds];
-                      newRounds[index].title = e.target.value;
-                      setRounds(newRounds);
-                    }}
-                  />
-
-                  <ReactQuill
-                    value={round.content}
-                    modules={{ toolbar: toolbarOptions }}
-                    onChange={(content) => {
-                      const newRounds = [...rounds];
-                      newRounds[index].content = content;
-                      setRounds(newRounds);
-                    }}
-                    placeholder="Enter Round Description"
-                    theme="snow"
-                    className="mt-1"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newRounds = [...rounds];
-                      newRounds.splice(index, 1);
-                      setRounds(newRounds);
-                    }}
-                    className="absolute top-0 right-0 p-2 text-red-500"
-                  >
-                    Remove
-                  </button>
-                </div>
+              {roundFields.map((field, index) => (
+                <Card key={field.id}>
+                  <CardHeader>
+                    <CardTitle>Round: {index + 1}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name={`rounds.${index}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Round Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Info title" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`rounds.${index}.content`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Round Description</FormLabel>
+                          <FormControl>
+                            <ReactQuill
+                              modules={{ toolbar: toolbarOptions }}
+                              theme="snow"
+                              value={field.value}
+                              onChange={(content) => field.onChange(content)}
+                              placeholder="Round Description"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {infoFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => removeRound(index)}
+                        className=""
+                      >
+                        Remove Post
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
 
-              <div>
-                <Button
-                  variant={"outline"}
-                  type="button"
-                  onClick={() =>
-                    setRounds([
-                      ...rounds,
-                      {
-                        title: "",
-                        content: "",
-                      },
-                    ])
-                  }
-                >
-                  Add New Round
-                </Button>
-              </div>
+              <Button
+                variant={"outline"}
+                type="button"
+                onClick={() => appendRound({ title: "", content: "" })}
+              >
+                Add New Round
+              </Button>
 
               <div className="space-x-2">
                 <Button
@@ -527,60 +534,112 @@ const BlogForm = () => {
                 )}
               />
 
-              {contacts.map((contact, index) => (
-                <>
-                  <div>
-                    <label className="block text-lg font-medium text-gray-700">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter Name"
-                      value={contact.name}
-                      onChange={(e) => {
-                        const newContacts = [...contacts];
-                        newContacts[index].name = e.target.value;
-                        setContacts(newContacts);
-                      }}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              {contactFields.map((field, index) => {
+                return (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Contact Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.email`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Contact Email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <div>
-                    <label className="block text-lg font-medium text-gray-700">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="Enter Email"
-                      value={contact.email}
-                      onChange={(e) => {
-                        const newContacts = [...contacts];
-                        newContacts[index].email = e.target.value;
-                        setContacts(newContacts);
-                      }}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.phoneCode`}
+                      render={({ field }) => (
+                        <FormItem className="">
+                          <FormLabel>Phone Code</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Phone Code" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {phoneCode.map((code) => (
+                                  <SelectItem
+                                    key={`${code.name}-${code.dial_code}`}
+                                    value={code.dial_code}
+                                    className="cursor-pointer"
+                                  >
+                                    {code.name}: {code.dial_code}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.phoneNumber`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Contact Phone Number"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <div>
-                    <label className="block text-lg font-medium text-gray-700">
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      value={contact.phoneNumber}
-                      onChange={(e) => {
-                        const newContacts = [...contacts];
-                        newContacts[index].phoneNumber = e.target.value;
-                        setContacts(newContacts);
-                      }}
-                      placeholder="Enter Phone Number"
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                </>
-              ))}
+                    {contactFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => removeContact(index)}
+                        className=""
+                      >
+                        Remove Contact
+                      </Button>
+                    )}
+                  </>
+                );
+              })}
+
+              <Button
+                variant={"outline"}
+                type="button"
+                onClick={() =>
+                  appendContact({
+                    name: "",
+                    email: "",
+                    phoneCode: "+91",
+                    phoneNumber: "",
+                  })
+                }
+              >
+                Add More Contact
+              </Button>
 
               <div className="space-x-2">
                 <Button
@@ -621,4 +680,4 @@ const BlogForm = () => {
   );
 };
 
-export default BlogForm;
+export default JobForm;
