@@ -44,10 +44,10 @@ export default function SetupProfile() {
     try {
       const response = await setUpCompanyProfile(data);
       if (response === "success") { 
-        toast.success("Company Profile Setup Successfully");
+        toast.success("Company profile setup successful");
       }
       else {
-        toast.error("Company Profile Setup Failed");
+        toast.error("Company profile setup failed");
       }
     } catch (error) {
       console.error(error);

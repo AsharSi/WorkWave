@@ -67,10 +67,7 @@ export async function sendOTP(email: string) {
     
     const res = await sendEmail(email, "MyLamp AI - Your OTP Code", emailContent);
     
-    console.log("res: ", res)
-
     if (res === "success") {
-      console.log(`OTP sent: ${otp}`)
       return "success"
     }
     else return "failed";

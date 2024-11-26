@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { handleSignOut } from "@/actions/authActions";
+import { ModeToggle } from "./ModeToggle";
 
 export default function Navbar() {
   return (
@@ -30,6 +31,7 @@ export default function Navbar() {
             ></Image>
           </Link>
           <div className="flex items-center">
+            <ModeToggle />
             <Button
               variant="ghost"
               size="icon"
@@ -53,7 +55,9 @@ export default function Navbar() {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <Link href="/dashboard">
-                  <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Profile
+                  </DropdownMenuItem>
                 </Link>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <form action={handleSignOut}>
@@ -62,7 +66,9 @@ export default function Navbar() {
                     className="h-auto p-0 font-normal w-full"
                     type="submit"
                   >
-                    <DropdownMenuItem className="w-full">Sign out</DropdownMenuItem>
+                    <DropdownMenuItem className="w-full">
+                      Sign out
+                    </DropdownMenuItem>
                   </Button>
                 </form>
               </DropdownMenuContent>

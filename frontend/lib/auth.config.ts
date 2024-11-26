@@ -13,7 +13,6 @@ const authConfig = {
     LinkedIn({
       allowDangerousEmailAccountLinking: true,
       profile(profile) {
-        console.log("profile ", profile);
         return {
           name: profile.name,
           email: profile.email,
@@ -59,11 +58,8 @@ const authConfig = {
         });
 
         if (!user) {
-          console.log("Invalid credentials");
           return null;
         }
-
-        console.log("user", user);
 
         return {
           id: user._id.toString(),
